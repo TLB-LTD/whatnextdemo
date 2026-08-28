@@ -127,9 +127,9 @@ export function histogram(counts) {
   })}</div>`;
 }
 
-export function kpi(label, value, note) {
+export function kpi(label, value, note, iconName) {
   return html`<div class="wn-kpi">
-    <span class="wn-kpi__label">${label}</span>
+    <span class="wn-kpi__label">${iconName ? icon(iconName) : ''}${label}</span>
     <span class="wn-kpi__value">${value}</span>
     ${note ? html`<span class="wn-kpi__note">${note}</span>` : ''}
   </div>`;
@@ -176,17 +176,28 @@ export function cover(story, o = {}) {
   const ratio = o.ratio || '34';
   return html`<div class="wn-cover wn-cover--${ratio} ${o.cls || ''}">
     ${art({ seed: story.code, motif: story.art?.motif, time: story.art?.time,
-            tint: o.tint, alt: `Bìa truyện ${story.title}` })}
+            tint: o.tint, hero: o.hero, alt: `Bìa truyện ${story.title}` })}
     ${o.overlay || ''}
   </div>`;
 }
 
+/**
+ * Thẻ truyện = một vùng bấm lớn + một nút phụ (lưu truyện).
+ *
+ * Không lồng `<button>` trong `<button>` — HTML không cho phép, và trình duyệt sẽ đẩy nút bên
+ * trong ra ngoài thẻ. Thay vào đó thẻ là một `<div>`, nút chính phủ kín thẻ bằng `::after`,
+ * còn nút lưu nằm trên nó một lớp.
+ */
 export function storyCard(story, o = {}) {
-  return html`<button type="button" class="wn-storycard" data-act="${o.act || 'open-story'}" data-arg="${story.id}">
-    ${cover(story, { ratio: '34', tint: o.tint, overlay: o.overlay })}
-    <span class="wn-storycard__title">${story.title}</span>
+  /* Nút lưu nằm NGOÀI khung bìa: khi rê chuột, bìa nhận `transform` và sinh ra một stacking
+     context mới, khiến z-index của nút bị nhốt bên trong và vùng bấm của thẻ che mất nó. */
+  return html`<div class="wn-storycard">
+    ${cover(story, { ratio: '34', tint: o.tint })}
+    <button type="button" class="wn-storycard__main" data-act="${o.act || 'open-story'}"
+      data-arg="${story.code}">${story.title}</button>
     <span class="wn-storycard__meta">${o.meta || story.categoryName}</span>
-  </button>`;
+    ${o.overlay || ''}
+  </div>`;
 }
 
 export function sheet(inner, o = {}) {
@@ -213,7 +224,7 @@ export function tabs(items, active, act = 'tab') {
   return html`<div class="wn-tabs" role="tablist">
     ${items.map((t) => html`<button type="button" role="tab" class="wn-tab"
       aria-selected="${t.id === active ? 'true' : 'false'}" data-act="${act}" data-arg="${t.id}"
-      >${t.label}</button>`)}
+      >${t.icon ? icon(t.icon) : ''}${t.label}</button>`)}
   </div>`;
 }
 

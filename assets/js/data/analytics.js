@@ -114,7 +114,7 @@ export const CMS_ROWS = [
   { code: 'wn-demo-ngay-dau-chuyen-lop', status: 'published', scenes: 6, endings: 2, updated: '2026-08-20' },
   { code: 'wn-demo-tieng-dong-tren-gac', status: 'review', scenes: 5, endings: 2, updated: '2026-08-25' },
   { code: 'wn-demo-chuyen-o-cho-que', status: 'published', scenes: 4, endings: 2, updated: '2026-08-21' },
-  { code: 'wn-demo-buoi-truc-nhat', status: 'draft', scenes: 2, endings: 0, updated: '2026-08-28' },
+  { code: 'wn-demo-buoi-truc-nhat', title: 'Buổi trực nhật', status: 'draft', scenes: 2, endings: 0, updated: '2026-08-28' },
 ];
 
 export const CMS_STATUS = {

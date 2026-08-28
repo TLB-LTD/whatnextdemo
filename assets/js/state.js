@@ -35,6 +35,10 @@ function seed() {
     proposalsSent: [],
     /* Bản soạn đang mở trong trình soạn thảo */
     composerId: null,
+    /* Truyện đang mở — mang theo qua các màn chi tiết / trình phát / đánh giá */
+    selectedStoryCode: 'wn-demo-cai-binh-vo',
+    /* Bản UGC đang mở trong hàng đợi biên tập */
+    reviewingUgcId: null,
   };
 }
 
@@ -126,6 +130,10 @@ export function saveRating(storyCode, stars, text) {
   });
 }
 
+export function selectStory(code) {
+  update((s) => { s.selectedStoryCode = code; });
+}
+
 export function ackStory(storyCode) {
   update((s) => { if (!s.acked.includes(storyCode)) s.acked.push(storyCode); });
 }
@@ -138,11 +146,16 @@ export function sendProposal(storyCode, sceneCode, idea) {
 
 /* ------------------------------------------------------------ sáng tác UGC */
 
-let nextUgcId = 600;
+/**
+ * Id mới phải tính TỪ kho đang có, không phải từ một biến đếm khởi tạo lại mỗi lần tải trang —
+ * nếu không, mở lại tab rồi tạo bản mới sẽ đụng id với bản đã lưu.
+ */
+function nextUgcId() {
+  return state.ugc.reduce((m, u) => Math.max(m, u.id), 599) + 1;
+}
 
 export function createUgcStory(draft) {
-  const id = nextUgcId;
-  nextUgcId += 1;
+  const id = nextUgcId();
   update((s) => {
     s.ugc.unshift({
       id, status: 'draft', ownerName: 'Bống', ownerKind: 'child',

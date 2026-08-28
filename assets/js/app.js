@@ -151,6 +151,7 @@ function paintFrame(ctx) {
   }
 
   s.after(ctx, target);
+  focusIntoOverlay(target);
 
   const bar = qs('#wnd-statebar');
   if (bar) {
@@ -211,7 +212,8 @@ function renderScreenPage(id) {
     </div>
   </div>`);
   paintFrame(ctx);
-  stage.focus({ preventScroll: true });
+  /* Không cướp focus khi màn mở sẵn một lớp phủ — lớp phủ vừa nhận focus xong. */
+  if (!overlayIn(stage)) stage.focus({ preventScroll: true });
   stage.scrollTop = 0;
 }
 
@@ -269,9 +271,72 @@ function renderNotFound() {
   </div>`);
 }
 
+/**
+ * Sheet và hộp thoại: đưa focus vào trong khi mở, và giữ Tab quẩn bên trong.
+ * Không có bước này thì người dùng bàn phím vẫn tab ra sau lưng lớp phủ mà không biết.
+ */
+let overlaySignature = '';
+
+function overlayIn(root) {
+  return root.querySelector('.wn-sheet, .wn-dialog');
+}
+
+function focusables(el) {
+  return Array.from(el.querySelectorAll(
+    'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]),'
+    + ' textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )).filter((n) => n.offsetParent !== null);
+}
+
+function focusIntoOverlay(root) {
+  const box = overlayIn(root);
+  const sig = box ? box.getAttribute('aria-label') || 'overlay' : '';
+  if (sig === overlaySignature) return;
+  overlaySignature = sig;
+  if (!box) return;
+  const first = focusables(box)[0];
+  if (first) first.focus({ preventScroll: true });
+}
+
 /* ------------------------------------------------------------------ sự kiện */
 
 function bind() {
+  /* Bỏ qua tới nội dung — là nút chứ không phải liên kết hash, vì hash là địa chỉ của router:
+     một `href="#wnd-stage"` sẽ bị router hiểu thành một tuyến không tồn tại. */
+  on(document, 'click', '[data-skip]', () => {
+    stage.setAttribute('tabindex', '-1');
+    stage.focus();
+    stage.scrollIntoView({ block: 'start' });
+  });
+
+  /* Escape đóng lớp phủ; Tab quẩn trong lớp phủ; Enter/Space kích hoạt hàng bảng bấm được. */
+  document.addEventListener('keydown', (e) => {
+    const frame = qs('#wnd-frame-viewport');
+
+    if (e.key === 'Escape' && host && frame && overlayIn(frame)) {
+      e.preventDefault();
+      host.screen.act(host, 'close-sheet', null, e, null);
+      return;
+    }
+
+    if (e.key === 'Tab' && frame) {
+      const box = overlayIn(frame);
+      if (!box) return;
+      const list = focusables(box);
+      if (!list.length) return;
+      const first = list[0];
+      const last = list[list.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      return;
+    }
+
+    if ((e.key === 'Enter' || e.key === ' ') && e.target instanceof Element) {
+      const row = e.target.closest('tr[data-act]');
+      if (row) { e.preventDefault(); row.click(); }
+    }
+  });
+
   /* Đổi khổ màn hình */
   on(document, 'click', '[data-vp]', (e, el) => {
     prefs.viewport = el.dataset.vp;

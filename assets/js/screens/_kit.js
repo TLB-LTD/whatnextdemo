@@ -117,7 +117,7 @@ export function childHeader(child) {
 export function storySection(title, stories, o = {}) {
   return html`<section class="wn-pad" style="padding-top:var(--wn-space-5)">
     <div class="wn-sectionhead">
-      <h2>${title}</h2>
+      <h2>${o.icon ? icon(o.icon) : ''}${title}</h2>
       ${o.more ? html`<span class="wn-spacer"></span><span class="wn-caption">${o.more}</span>` : ''}
     </div>
     ${stories.length
@@ -129,10 +129,11 @@ export function storySection(title, stories, o = {}) {
   </section>`;
 }
 
-export function favOverlay(saved) {
+export function favOverlay(saved, code) {
   return html`<button type="button" class="wn-icobtn wn-icobtn--onart wn-storycard__fav"
-    data-act="fav" aria-label="${saved ? 'Bỏ lưu truyện' : 'Lưu truyện'}"
-    style="${saved ? 'color:var(--wn-warning)' : ''}">${icon('heart')}</button>`;
+    data-act="fav" data-arg="${code}" aria-pressed="${saved ? 'true' : 'false'}"
+    aria-label="${saved ? 'Bỏ lưu truyện' : 'Lưu truyện'}"
+    style="${saved ? 'color:var(--wn-warning)' : ''}">${icon(saved ? 'heartFull' : 'heart')}</button>`;
 }
 
 /* --------------------------------------------------------- cổng phụ huynh */
@@ -226,10 +227,11 @@ export function adminShell(activeId, content, o = {}) {
   </div>`;
 }
 
-export function pageHead(title, sub, right) {
+export function pageHead(title, sub, right, iconName) {
   return html`<div class="wn-row wn-row--wrap" style="margin-bottom:var(--wn-space-5)">
     <div class="wn-stack-1" style="flex:1;min-width:220px">
-      <h1 class="wn-headline">${title}</h1>
+      <h1 class="wn-headline" style="display:inline-flex;align-items:center;gap:10px"
+        >${iconName ? icon(iconName) : ''}${title}</h1>
       ${sub ? html`<p class="wn-caption">${sub}</p>` : ''}
     </div>
     ${right || ''}
@@ -262,7 +264,11 @@ export function barChart(rows, o = {}) {
     </div>`)}</div>`;
 }
 
+let sparkSeq = 0;
+
 export function sparkline(values, o = {}) {
+  sparkSeq += 1;
+  const gid = `sp${sparkSeq}`;
   const w = 640;
   const h = o.height || 120;
   const max = Math.max(...values);
@@ -277,11 +283,11 @@ export function sparkline(values, o = {}) {
   return raw(`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img"
     aria-label="Xu hướng ${values.length} ngày, thấp nhất ${min}, cao nhất ${max}"
     style="width:100%;height:${h}px;display:block">
-    <defs><linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="var(--wn-accent)" stop-opacity="0.28"/>
       <stop offset="1" stop-color="var(--wn-accent)" stop-opacity="0"/>
     </linearGradient></defs>
-    <path d="${area}" fill="url(#spark)"/>
+    <path d="${area}" fill="url(#${gid})"/>
     <path d="${line}" fill="none" stroke="var(--wn-accent)" stroke-width="2.5"
       stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
   </svg>`);

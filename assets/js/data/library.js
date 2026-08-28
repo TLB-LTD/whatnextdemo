@@ -8,8 +8,20 @@
 import { allStories } from 'wnd/data/catalog.js';
 import { publishedUgcStories } from 'wnd/state.js';
 
+let cache = null;
+let cacheKey = '';
+
+/**
+ * Một lần vẽ màn thư viện gọi hàm này hàng chục lần (mỗi chip thể loại một lần). Nhớ lại theo
+ * danh sách bản UGC đã xuất bản là đủ: khoá đổi đúng lúc biên tập xuất bản một truyện mới.
+ */
 export function library() {
-  return allStories(publishedUgcStories());
+  const published = publishedUgcStories();
+  const key = published.map((s) => s.code + ':' + s.title).join('|');
+  if (cache && key === cacheKey) return cache;
+  cacheKey = key;
+  cache = allStories(published);
+  return cache;
 }
 
 export function findStory(codeOrId) {

@@ -10,14 +10,22 @@ import {
   skeletonGrid, storyCard, stars, starPicker, histogram, avatar, relTime, num, confetti,
 } from 'wnd/ui.js';
 import { readerShell, childHeader, storySection, favOverlay, wordmark } from 'wnd/screens/_kit.js';
-import { CATEGORIES, AGE_BANDS, INTEREST_GROUPS, groupByCategory } from 'wnd/data/catalog.js';
+import { CATEGORIES, AGE_BANDS, INTEREST_GROUPS, categoryIcon } from 'wnd/data/catalog.js';
 import { library, findStory } from 'wnd/data/library.js';
 import { STRATEGIES } from 'wnd/data/strategies.js';
 import { CHILDREN, HISTORY, NOTIFICATIONS } from 'wnd/data/people.js';
-import { getState, toggleSaved, saveRating } from 'wnd/state.js';
+import { getState, toggleSaved, saveRating, selectStory } from 'wnd/state.js';
 import { newSession, renderPlayer, playerAct } from 'wnd/flows/play.js';
 
 const ME = CHILDREN[0];
+
+/** Bốn tab dưới cùng phải đi đúng bốn nơi — trước đây tab nào cũng về thư viện. */
+const TAB_ROUTE = {
+  home: '/man-hinh/child-home',
+  library: '/man-hinh/child-library',
+  mine: '/man-hinh/child-my-home',
+  parent: '/man-hinh/parent-gate',
+};
 
 export const childScreens = [
   {
@@ -207,14 +215,14 @@ export const childScreens = [
         content: html`
           ${childHeader(ME)}
           ${resuming.length ? storySection('Đang đọc dở', resuming, {
-            act: 'open', meta: () => 'Chạm để đọc tiếp',
+            act: 'open', icon: 'play', meta: () => 'Chạm để đọc tiếp',
           }) : ''}
           ${fresh.length ? storySection('Bạn nhỏ vừa viết', fresh, {
-            act: 'open', meta: (s) => `Tác giả: ${s.author.name}`,
+            act: 'open', icon: 'wand', meta: (s) => `Tác giả: ${s.author.name}`,
           }) : ''}
           ${storySection('Gợi ý cho con', suggested, {
-            act: 'open',
-            overlay: (s) => favOverlay(st.saved.includes(s.code)),
+            act: 'open', icon: 'sparkles',
+            overlay: (s) => favOverlay(st.saved.includes(s.code), s.code),
           })}
           <div class="wn-pad">
             <button type="button" class="wn-card wn-row" data-act="notebook" style="cursor:pointer;width:100%;text-align:left">
@@ -229,12 +237,12 @@ export const childScreens = [
           </div>`,
       });
     },
-    act(ctx, act) {
-      if (act === 'open') ctx.go('/man-hinh/child-story-detail');
+    act(ctx, act, arg) {
+      if (act === 'open') { selectStory(arg); ctx.go('/man-hinh/child-story-detail'); }
       if (act === 'notebook') ctx.go('/man-hinh/child-notebook');
-      if (act === 'tab') ctx.go('/man-hinh/child-library');
+      if (act === 'tab') ctx.go(TAB_ROUTE[arg] || '/man-hinh/child-home');
       if (act === 'notifications') ctx.go('/man-hinh/child-notifications');
-      if (act === 'fav') ctx.rerender();
+      if (act === 'fav') toggleSaved(arg);
     },
   },
 
@@ -255,24 +263,31 @@ export const childScreens = [
       if (ctx.local.cat) all = all.filter((s) => s.categoryCode === ctx.local.cat);
       if (ctx.local.q) all = all.filter((s) => s.title.toLowerCase().includes(ctx.local.q.toLowerCase()));
       if (ctx.view === 'empty') all = [];
-      const groups = groupByCategory(all);
+      const whole = library();
+      const cats = CATEGORIES.filter((c) => whole.some((s) => s.categoryCode === c.code));
+      const heading = ctx.local.cat
+        ? CATEGORIES.find((c) => c.code === ctx.local.cat).name
+        : 'Tất cả truyện';
       return readerShell({
         title: 'Truyện', tab: 'library',
         actions: iconBtn('search', { label: 'Tìm truyện', act: 'search' }),
         content: html`
           <div class="wn-pad" style="padding-bottom:0">
             <div class="wn-row wn-row--wrap" role="group" aria-label="Lọc theo thể loại">
-              <button type="button" class="wn-chip ${!ctx.local.cat ? 'is-on' : ''}" data-act="cat" data-arg="">Tất cả</button>
-              ${CATEGORIES.filter((c) => library().some((s) => s.categoryCode === c.code)).map((c) => html`
-                <button type="button" class="wn-chip ${ctx.local.cat === c.code ? 'is-on' : ''}"
-                  data-act="cat" data-arg="${c.code}">${c.name}</button>`)}
+              <button type="button" class="wn-chip ${!ctx.local.cat ? 'is-on' : ''}" data-act="cat" data-arg=""
+                aria-pressed="${!ctx.local.cat ? 'true' : 'false'}">${icon('grid')}Tất cả</button>
+              ${cats.map((c) => html`<button type="button"
+                class="wn-chip ${ctx.local.cat === c.code ? 'is-on' : ''}" data-act="cat" data-arg="${c.code}"
+                aria-pressed="${ctx.local.cat === c.code ? 'true' : 'false'}"
+                >${icon(categoryIcon(c.code))}${c.name}</button>`)}
             </div>
           </div>
           ${all.length
-            ? groups.map((g) => storySection(g.name, g.stories, {
-                act: 'open',
-                overlay: (s) => favOverlay(st.saved.includes(s.code)),
-              }))
+            ? storySection(heading, all, {
+                act: 'open', icon: ctx.local.cat ? categoryIcon(ctx.local.cat) : 'grid',
+                meta: (s) => `${s.categoryName} · ${s.estimatedMinutes} phút`,
+                overlay: (s) => favOverlay(st.saved.includes(s.code), s.code),
+              })
             : html`<div class="wn-pad">${empty('search', 'Chưa có truyện nào ở đây',
                 'Thử bỏ bộ lọc để xem toàn bộ thư viện.',
                 btn('Xoá bộ lọc', { kind: 'outline', act: 'clear' }))}</div>`}`,
@@ -281,10 +296,10 @@ export const childScreens = [
     act(ctx, act, arg) {
       if (act === 'cat') { ctx.local.cat = arg || null; ctx.view = 'default'; ctx.rerender(); }
       if (act === 'clear') { ctx.local.cat = null; ctx.local.q = ''; ctx.view = 'default'; ctx.rerender(); }
-      if (act === 'open') ctx.go('/man-hinh/child-story-detail');
-      if (act === 'fav') { ctx.toast('Đã lưu vào “Của tôi”.'); }
+      if (act === 'open') { selectStory(arg); ctx.go('/man-hinh/child-story-detail'); }
+      if (act === 'fav') ctx.toast(toggleSaved(arg) ? 'Đã lưu vào “Của tôi”.' : 'Đã bỏ lưu.');
       if (act === 'search') ctx.toast('Ô tìm kiếm mở ngay trên thanh tiêu đề trong bản đầy đủ.');
-      if (act === 'tab') ctx.go(arg === 'mine' ? '/man-hinh/child-my-home' : '/man-hinh/child-home');
+      if (act === 'tab') ctx.go(TAB_ROUTE[arg] || '/man-hinh/child-home');
     },
   },
 
@@ -295,8 +310,8 @@ export const childScreens = [
     live: true,
     init: () => ({ tab: 'overview' }),
     render(ctx) {
-      const story = findStory('wn-demo-cai-binh-vo');
       const st = getState();
+      const story = findStory(st.selectedStoryCode) || library()[0];
       const saved = st.saved.includes(story.code);
       const finished = st.finished[story.code];
       return readerShell({
@@ -311,7 +326,8 @@ export const childScreens = [
               <div class="wn-stack-3">
                 <div class="wn-stack-1">
                   <h2 class="wn-headline">${story.title}</h2>
-                  <span class="wn-caption">${story.categoryName} · ${story.bandLabel} · ${story.estimatedMinutes} phút</span>
+                  <span class="wn-caption">${icon(categoryIcon(story.categoryCode))} ${story.categoryName}
+                    · ${icon('users')} ${story.bandLabel} · ${icon('clock')} ${story.estimatedMinutes} phút</span>
                 </div>
                 <div class="wn-row wn-row--wrap">
                   ${stars(story.rating.average)}
@@ -325,9 +341,11 @@ export const childScreens = [
           <div style="position:sticky;top:0;z-index:4">
             ${html`<div class="wn-tabs" role="tablist">
               <button type="button" role="tab" class="wn-tab" data-act="tab" data-arg="overview"
-                aria-selected="${ctx.local.tab === 'overview' ? 'true' : 'false'}">Tổng quan</button>
+                aria-selected="${ctx.local.tab === 'overview' ? 'true' : 'false'}"
+                >${icon('bookOpen')}Tổng quan</button>
               <button type="button" role="tab" class="wn-tab" data-act="tab" data-arg="ratings"
-                aria-selected="${ctx.local.tab === 'ratings' ? 'true' : 'false'}">Đánh giá</button>
+                aria-selected="${ctx.local.tab === 'ratings' ? 'true' : 'false'}"
+                >${icon('star')}Đánh giá</button>
             </div>`}
           </div>
           <div class="wn-pad wn-stack-5">
@@ -352,7 +370,7 @@ export const childScreens = [
       });
     },
     act(ctx, act, arg, e, el) {
-      const story = findStory('wn-demo-cai-binh-vo');
+      const story = findStory(getState().selectedStoryCode) || library()[0];
       if (act === 'tab') { ctx.local.tab = arg; ctx.rerender(); }
       if (act === 'fav') { toggleSaved(story.code); }
       if (act === 'play') ctx.go('/man-hinh/child-player');
@@ -405,7 +423,7 @@ export const childScreens = [
     desc: 'Trái tim của sản phẩm. Chọn một cách xử lý, xem chuyện đi tiếp, và thấy sổ chiến lược đầy dần.',
     live: true,
     init() {
-      const story = findStory('wn-demo-cai-binh-vo');
+      const story = findStory(getState().selectedStoryCode) || library()[0];
       return { sess: newSession(story), storyCode: story.code };
     },
     render(ctx) {
@@ -559,8 +577,8 @@ export const childScreens = [
         </div>`,
       });
     },
-    act(ctx, act) {
-      if (act === 'open') ctx.go('/man-hinh/child-story-detail');
+    act(ctx, act, arg) {
+      if (act === 'open') { selectStory(arg); ctx.go('/man-hinh/child-story-detail'); }
       if (act === 'back') ctx.go('/man-hinh/child-my-home');
     },
   },
@@ -661,11 +679,11 @@ export const childScreens = [
         </div>`,
       });
     },
-    act(ctx, act) {
+    act(ctx, act, arg) {
       const map = { saved: 'child-my-saved', ugc: 'ugc-list', notebook: 'child-notebook',
         history: 'child-history', profile: 'child-profile', notifications: 'child-notifications' };
       if (map[act]) ctx.go('/man-hinh/' + map[act]);
-      if (act === 'tab') ctx.go('/man-hinh/child-home');
+      if (act === 'tab') ctx.go(TAB_ROUTE[arg] || '/man-hinh/child-home');
     },
   },
 
@@ -683,16 +701,16 @@ export const childScreens = [
         title: 'Đã lưu', back: 'back',
         content: saved.length
           ? storySection(`${saved.length} truyện`, saved, {
-              act: 'open', overlay: () => favOverlay(true) })
+              act: 'open', overlay: (s) => favOverlay(true, s.code) })
           : empty('heart', 'Chưa có truyện nào được lưu',
               'Chạm vào trái tim trên trang truyện để lưu lại đọc sau.',
               btn('Tới thư viện', { kind: 'primary', act: 'back' })),
       });
     },
     act(ctx, act, arg) {
-      if (act === 'open') ctx.go('/man-hinh/child-story-detail');
+      if (act === 'open') { selectStory(arg); ctx.go('/man-hinh/child-story-detail'); }
       if (act === 'back') ctx.go('/man-hinh/child-my-home');
-      if (act === 'fav') ctx.toast('Đã bỏ lưu. Hoàn tác?');
+      if (act === 'fav') { toggleSaved(arg); ctx.toast('Đã bỏ lưu khỏi “Của tôi”.'); }
     },
   },
 

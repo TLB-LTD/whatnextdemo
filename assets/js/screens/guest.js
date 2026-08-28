@@ -7,9 +7,10 @@
 
 import { html, icon, raw, art, cover, btn, badge, banner, empty, skeletonGrid, storyCard } from 'wnd/ui.js';
 import { readerShell, storySection, wordmark } from 'wnd/screens/_kit.js';
-import { AGE_BANDS, CATEGORIES, groupByCategory, evaluateAccess } from 'wnd/data/catalog.js';
+import { AGE_BANDS, CATEGORIES, categoryIcon, evaluateAccess } from 'wnd/data/catalog.js';
 import { library, findStory } from 'wnd/data/library.js';
 import { newSession, renderPlayer, playerAct } from 'wnd/flows/play.js';
+import { getState, selectStory } from 'wnd/state.js';
 
 const GUEST_BANDS = AGE_BANDS.slice(0, 4);
 
@@ -134,7 +135,10 @@ export const guestScreens = [
           'Thử bỏ bớt bộ lọc hoặc đổi nhóm tuổi.',
           btn('Xoá bộ lọc', { kind: 'outline', act: 'clear' })) });
       }
-      const groups = groupByCategory(ctx.local.cat ? all.filter((s) => s.categoryCode === ctx.local.cat) : all);
+      const shown = ctx.local.cat ? all.filter((s) => s.categoryCode === ctx.local.cat) : all;
+      const heading = ctx.local.cat
+        ? CATEGORIES.find((c) => c.code === ctx.local.cat).name
+        : 'Truyện cho nhóm 6–10';
       return readerShell({
         title: 'Thư viện',
         actions: html`<span class="wn-badge wn-badge--neutral">${icon('users')}Khách · Thiếu nhi (6–10)</span>`,
@@ -146,15 +150,17 @@ export const guestScreens = [
                 thích và giữ sổ chiến lược của con.</div>
             </div>
             <div class="wn-row wn-row--wrap" role="group" aria-label="Lọc theo thể loại">
-              <button type="button" class="wn-chip ${!ctx.local.cat ? 'is-on' : ''}" data-act="cat" data-arg="">Tất cả</button>
+              <button type="button" class="wn-chip ${!ctx.local.cat ? 'is-on' : ''}" data-act="cat" data-arg=""
+                aria-pressed="${!ctx.local.cat ? 'true' : 'false'}">${icon('grid')}Tất cả</button>
               ${CATEGORIES.filter((c) => all.some((s) => s.categoryCode === c.code)).map((c) => html`
                 <button type="button" class="wn-chip ${ctx.local.cat === c.code ? 'is-on' : ''}"
-                  data-act="cat" data-arg="${c.code}">${c.name}</button>`)}
+                  data-act="cat" data-arg="${c.code}" aria-pressed="${ctx.local.cat === c.code ? 'true' : 'false'}"
+                  >${icon(categoryIcon(c.code))}${c.name}</button>`)}
             </div>
           </div>
-          ${groups.map((g) => storySection(g.name, g.stories, {
-            act: 'open', meta: (s) => `${s.estimatedMinutes} phút${s.guestPlayAllowed ? '' : ' · cần đăng nhập'}`,
-          }))}
+          ${storySection(heading, shown, {
+            act: 'open', meta: (s) => `${s.categoryName} · ${s.estimatedMinutes} phút${s.guestPlayAllowed ? '' : ' · cần đăng nhập'}`,
+          })}
           <div class="wn-pad">
             <div class="wn-card wn-card--flat wn-row wn-row--wrap">
               ${icon('userPlus')}
@@ -169,7 +175,7 @@ export const guestScreens = [
     act(ctx, act, arg) {
       if (act === 'cat') { ctx.local.cat = arg || null; ctx.rerender(); }
       if (act === 'clear') { ctx.local.cat = null; ctx.view = 'default'; ctx.rerender(); }
-      if (act === 'open') ctx.go('/man-hinh/guest-story-detail');
+      if (act === 'open') { selectStory(arg); ctx.go('/man-hinh/guest-story-detail'); }
       if (act === 'gate') ctx.go('/man-hinh/guest-softgate');
     },
   },
@@ -184,7 +190,7 @@ export const guestScreens = [
     render(ctx) {
       const story = ctx.view === 'gated'
         ? findStory('wn-demo-tieng-dong-tren-gac')
-        : findStory('wn-demo-cai-binh-vo');
+        : (findStory(getState().selectedStoryCode) || library()[0]);
       const access = evaluateAccess(story, { bandCode: 'age_6_10', loggedIn: false, acked: false });
       return readerShell({
         title: 'Chi tiết truyện', back: 'back',
@@ -235,7 +241,7 @@ export const guestScreens = [
     desc: 'Cùng trình phát với trẻ đã đăng nhập. Tiến trình chỉ nằm trên thiết bị này cho tới khi có tài khoản.',
     live: true,
     init() {
-      const story = findStory('wn-demo-cai-binh-vo');
+      const story = findStory(getState().selectedStoryCode) || library()[0];
       return { sess: newSession(story), storyCode: story.code };
     },
     render(ctx) {

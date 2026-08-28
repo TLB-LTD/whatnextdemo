@@ -188,9 +188,11 @@
 .wn-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--wn-border); background: var(--wn-surface); }
 .wn-tab {
   flex: 1; min-height: var(--wn-tap); border: 0; background: transparent; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
   font-size: var(--wn-text-label); font-weight: 600; color: var(--wn-text-secondary);
   border-bottom: 2px solid transparent; padding: 0 var(--wn-space-3);
 }
+.wn-tab svg { width: 17px; height: 17px; flex: none; }
 .wn-tab[aria-selected="true"] { color: var(--wn-accent); border-bottom-color: var(--wn-accent); }
 
 .wn-bottomnav {
@@ -284,16 +286,19 @@
 .wn-cover--169 { aspect-ratio: 16 / 9; }
 .wn-cover--34  { aspect-ratio: 3 / 4; }
 
-.wn-storycard {
-  display: grid; gap: var(--wn-space-2); cursor: pointer;
-  background: transparent; border: 0; padding: 0; text-align: left; color: inherit;
-}
+.wn-storycard { position: relative; display: grid; gap: var(--wn-space-2); }
 .wn-storycard .wn-cover { box-shadow: var(--wn-shadow-card); transition: transform var(--wn-motion-base) var(--wn-easing); }
 .wn-storycard:hover .wn-cover { transform: translateY(-3px); }
-.wn-storycard__title { font-size: var(--wn-text-label); font-weight: 600; line-height: 1.3;
-  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wn-storycard__main {
+  border: 0; background: transparent; padding: 0; text-align: left; cursor: pointer; color: inherit;
+  font-size: var(--wn-text-label); font-weight: 600; line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+/* Nút chính phủ kín cả thẻ, nên bấm vào bìa cũng mở truyện. */
+.wn-storycard__main::after { content: ""; position: absolute; inset: 0; border-radius: var(--wn-radius-lg); }
+.wn-storycard__main:focus-visible::after { outline: 2px solid var(--wn-focus); outline-offset: 3px; }
 .wn-storycard__meta { font-size: var(--wn-text-micro); color: var(--wn-muted); }
-.wn-storycard__fav { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; }
+.wn-storycard__fav { position: absolute; top: 8px; right: 8px; width: 36px; height: 36px; z-index: 3; }
 
 .wn-grid { display: grid; gap: var(--wn-space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @container screen (min-width: 768px)  { .wn-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
@@ -329,7 +334,9 @@
 .wn-kpi { display: grid; gap: var(--wn-space-1); padding: var(--wn-space-4); background: var(--wn-surface);
   border: 1px solid var(--wn-border); border-radius: var(--wn-radius-lg); }
 .wn-kpi__label { font-size: var(--wn-text-micro); color: var(--wn-muted); font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.04em; }
+  text-transform: uppercase; letter-spacing: 0.04em;
+  display: inline-flex; align-items: center; gap: 6px; }
+.wn-kpi__label svg { width: 14px; height: 14px; flex: none; }
 .wn-kpi__value { font-size: var(--wn-text-headline); font-weight: 700; line-height: 1.1; }
 .wn-kpi__note { font-size: var(--wn-text-micro); color: var(--wn-text-secondary); }
 
@@ -356,7 +363,9 @@
 .wn-sticky-cta { position: sticky; bottom: 0; padding: var(--wn-space-3) var(--wn-gutter) var(--wn-space-4);
   background: linear-gradient(to top, var(--wn-bg) 62%, transparent); }
 .wn-sectionhead { display: flex; align-items: baseline; gap: var(--wn-space-3); margin-bottom: var(--wn-space-3); }
-.wn-sectionhead h2 { font-size: var(--wn-text-title); font-weight: 600; }
+.wn-sectionhead h2 { font-size: var(--wn-text-title); font-weight: 600;
+  display: inline-flex; align-items: center; gap: 9px; }
+.wn-sectionhead h2 svg { width: 19px; height: 19px; flex: none; color: var(--wn-accent); }
 .wn-divider { height: 1px; background: var(--wn-border); border: 0; margin: 0; }
 
 .wn-two-col { display: grid; gap: var(--wn-space-6); }

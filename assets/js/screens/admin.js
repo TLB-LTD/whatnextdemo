@@ -14,7 +14,7 @@ import {
 } from 'wnd/ui.js';
 import { adminShell, pageHead, dateRangeBar, barChart, sparkline } from 'wnd/screens/_kit.js';
 import { UGC_STATUS, UGC_TRANSITIONS } from 'wnd/data/ugc.js';
-import { CATEGORIES, AGE_BANDS, GATE_LEVELS, RATING_LABEL } from 'wnd/data/catalog.js';
+import { CATEGORIES, AGE_BANDS, GATE_LEVELS, RATING_LABEL, categoryIcon } from 'wnd/data/catalog.js';
 import { library, findStory } from 'wnd/data/library.js';
 import { STRATEGIES } from 'wnd/data/strategies.js';
 import { PROPOSALS, MODERATORS } from 'wnd/data/people.js';
@@ -22,7 +22,7 @@ import {
   KPIS, DAILY_SESSIONS, STORY_METRICS, SCENE_DROPOFF, CHOICE_DISTRIBUTION,
   PROPOSAL_STATS, AUDIO_STATS, CMS_ROWS, CMS_STATUS, DATE_RANGE,
 } from 'wnd/data/analytics.js';
-import { getState, transitionUgc, postThread } from 'wnd/state.js';
+import { getState, transitionUgc, postThread, update } from 'wnd/state.js';
 import { treeSvg } from 'wnd/flows/compose.js';
 
 const TRANSITION_LABEL = {
@@ -46,9 +46,10 @@ export const adminScreens = [
       const queue = st.ugc.filter((u) => ['submitted', 'under_review', 'needs_revision'].includes(u.status));
       const pending = PROPOSALS.filter((p) => p.status === 'pending');
       return adminShell('admin-dashboard', html`
-        ${pageHead('Tổng quan', 'Việc cần xử lý và số liệu 30 ngày gần nhất.')}
+        ${pageHead('Tổng quan', 'Việc cần xử lý và số liệu 30 ngày gần nhất.', null, 'barChart')}
         <div class="wn-cols-4" style="margin-bottom:var(--wn-space-5)">
-          ${KPIS.map((k) => kpi(k.label, num(k.value), k.note))}
+          ${KPIS.map((k, i) => kpi(k.label, num(k.value), k.note,
+            ['activity', 'checkCircle', 'handHeart', 'bookOpen'][i]))}
         </div>
         <div class="wn-two-col" style="margin-bottom:var(--wn-space-5)">
           <div class="wn-card wn-stack-3">
@@ -105,7 +106,7 @@ export const adminScreens = [
       });
       return adminShell('admin-story-list', html`
         ${pageHead('Truyện', `${CMS_ROWS.length} truyện trong hệ thống.`,
-          btn('Tạo truyện', { kind: 'primary', act: 'new', icon: 'plus' }))}
+          btn('Tạo truyện', { kind: 'primary', act: 'new', icon: 'plus' }), 'book')}
         <div class="wn-card wn-card--flat wn-row wn-row--wrap" style="margin-bottom:var(--wn-space-4);padding:var(--wn-space-3)">
           <input class="wn-input" style="max-width:280px" placeholder="Tìm theo tên truyện…"
             data-field="q" value="${ctx.local.q}" aria-label="Tìm truyện">
@@ -121,9 +122,10 @@ export const adminScreens = [
           <tbody>${rows.map((r) => {
             const s = findStory(r.code);
             const cms = CMS_STATUS[r.status];
-            return html`<tr data-act="open" data-arg="${r.code}">
-              <td><b>${s ? s.title : r.code}</b></td>
-              <td>${s ? s.categoryName : '—'}</td>
+            return html`<tr data-act="open" data-arg="${r.code}" tabindex="0" role="button"
+              aria-label="Mở ${s ? s.title : r.title}">
+              <td><b>${s ? s.title : r.title || 'Truyện chưa đặt tên'}</b></td>
+              <td>${s ? html`${icon(categoryIcon(s.categoryCode))} ${s.categoryName}` : '—'}</td>
               <td>${r.scenes}</td><td>${r.endings}</td>
               <td>${badge(cms.label, cms.tone)}</td>
               <td>${r.updated}</td>
@@ -466,7 +468,7 @@ export const adminScreens = [
       let rows = st.ugc;
       if (ctx.local.status) rows = rows.filter((u) => u.status === ctx.local.status);
       return adminShell('admin-ugc-queue', html`
-        ${pageHead('Hàng đợi sáng tác', `${st.ugc.length} bản trong hệ thống.`)}
+        ${pageHead('Hàng đợi sáng tác', `${st.ugc.length} bản trong hệ thống.`, null, 'layers')}
         <div class="wn-card wn-card--flat wn-row wn-row--wrap" style="margin-bottom:var(--wn-space-4);padding:var(--wn-space-3)">
           <input class="wn-input" style="max-width:260px" placeholder="Tìm theo tên truyện…" aria-label="Tìm">
           <div class="wn-row wn-row--wrap">
@@ -482,7 +484,8 @@ export const adminScreens = [
           <tbody>${rows.map((u) => {
             const s = UGC_STATUS[u.status];
             const msgs = u.thread.filter((m) => m.role !== 'system').length;
-            return html`<tr data-act="open" data-arg="${u.id}">
+            return html`<tr data-act="open" data-arg="${u.id}" tabindex="0" role="button"
+              aria-label="Mở bản ${u.title}">
               <td><b>${u.title}</b><br><span class="wn-micro">${u.description.slice(0, 54)}</span></td>
               <td><span class="wn-row" style="gap:8px">${avatar(u.ownerName, { size: 24 })}${u.ownerName}</span></td>
               <td>${u.scenes.length}</td>
@@ -499,7 +502,10 @@ export const adminScreens = [
     },
     act(ctx, act, arg) {
       if (act === 'f') { ctx.local.status = arg || ''; ctx.rerender(); }
-      if (act === 'open') { ctx.local.pick = Number(arg); ctx.go('/man-hinh/admin-ugc-workspace'); }
+      if (act === 'open') {
+        update((s) => { s.reviewingUgcId = Number(arg); });
+        ctx.go('/man-hinh/admin-ugc-workspace');
+      }
     },
   },
 
@@ -508,11 +514,12 @@ export const adminScreens = [
     sid: 'ADM-UGC-WORKSPACE', name: 'Không gian duyệt',
     desc: 'Ba cột: thông tin · truyện · trao đổi. Chấp nhận và xuất bản ở đây thì thư viện của trẻ có ngay.',
     live: true,
-    init: () => ({ pick: null, reply: '', dialog: null, note: '', publicNote: '' }),
+    init: () => ({ reply: '', dialog: null, note: '', publicNote: '' }),
     render(ctx) {
       const st = getState();
       const queue = st.ugc;
-      const u = queue.find((x) => x.id === ctx.local.pick) || queue.find((x) => x.status !== 'draft') || queue[0];
+      const u = queue.find((x) => x.id === st.reviewingUgcId)
+        || queue.find((x) => x.status !== 'draft') || queue[0];
       if (!u) return adminShell('admin-ugc-workspace', empty('layers', 'Hàng đợi trống', 'Chưa có bản nào để duyệt.'));
       const s = UGC_STATUS[u.status];
       /* `submitted` là hành động của TÁC GIẢ (gửi / gửi lại), không phải của biên tập —
@@ -628,10 +635,11 @@ export const adminScreens = [
     act(ctx, act, arg, e, el) {
       const st = getState();
       const queue = st.ugc;
-      const u = queue.find((x) => x.id === ctx.local.pick) || queue.find((x) => x.status !== 'draft') || queue[0];
+      const u = queue.find((x) => x.id === st.reviewingUgcId)
+        || queue.find((x) => x.status !== 'draft') || queue[0];
       if (!u) return;
 
-      if (act === 'pick') { ctx.local.pick = Number(arg); ctx.rerender(); }
+      if (act === 'pick') update((s) => { s.reviewingUgcId = Number(arg); });
       if (act === 'queue') ctx.go('/man-hinh/admin-ugc-queue');
       if (act === 'close') { ctx.local.dialog = null; ctx.rerender(); }
       if (act === '__field') { ctx.local[arg] = el.value; }
@@ -653,9 +661,9 @@ export const adminScreens = [
           approved: 'Bản này đã được chấp nhận.',
           published: 'Truyện đã được xuất bản vào thư viện.',
         }[arg];
+        update((s) => { s.reviewingUgcId = u.id; });
         transitionUgc(u.id, arg, note, arg === 'needs_revision' ? 'staff' : 'system');
         ctx.local.reply = '';
-        ctx.local.pick = u.id;
         ctx.rerender();
         ctx.toast(arg === 'published'
           ? 'Đã xuất bản. Mở thư viện của trẻ để thấy truyện này.'
@@ -685,12 +693,13 @@ export const adminScreens = [
     init: () => ({}),
     render() {
       return adminShell('admin-report-home', html`
-        ${pageHead('Báo cáo', 'Số liệu tổng hợp. Không có dòng nào ở mức cá nhân.')}
+        ${pageHead('Báo cáo', 'Số liệu tổng hợp. Không có dòng nào ở mức cá nhân.', null, 'trendingUp')}
         ${dateRangeBar(DATE_RANGE)}
         ${banner('Báo cáo chỉ hiển thị metric tổng hợp theo truyện, trang và lựa chọn. '
           + 'Không liệt kê tên trẻ, email hay bất kỳ định danh cá nhân nào.', 'info', 'shield')}
         <div class="wn-cols-4" style="margin:var(--wn-space-5) 0">
-          ${KPIS.map((k) => kpi(k.label, num(k.value), k.note))}
+          ${KPIS.map((k, i) => kpi(k.label, num(k.value), k.note,
+            ['activity', 'checkCircle', 'handHeart', 'bookOpen'][i]))}
         </div>
         <div class="wn-card wn-stack-3" style="margin-bottom:var(--wn-space-5)">
           <b class="wn-label">Phiên đọc theo ngày</b>
@@ -727,13 +736,13 @@ export const adminScreens = [
       });
       const head = [['starts', 'Bắt đầu'], ['completes', 'Hoàn thành'], ['rate', 'Tỉ lệ đọc trọn'], ['minutes', 'Phút trung bình']];
       return adminShell('admin-report-stories', html`
-        ${pageHead('Hiệu năng truyện', 'Sắp xếp bằng cách bấm vào tiêu đề cột.')}
+        ${pageHead('Hiệu năng truyện', 'Sắp xếp bằng cách bấm vào tiêu đề cột.', null, 'barChart')}
         ${dateRangeBar(DATE_RANGE)}
         <div class="wn-tablewrap" style="margin-top:var(--wn-space-4)"><table class="wn-table">
           <thead><tr><th>Truyện</th>
             ${head.map(([k, l]) => html`<th style="cursor:pointer" data-act="sort" data-arg="${k}"
               aria-sort="${ctx.local.sort === k ? 'descending' : 'none'}">
-              ${l}${ctx.local.sort === k ? ' ▾' : ''}</th>`)}
+              ${l}${ctx.local.sort === k ? icon('sortDown') : ''}</th>`)}
           </tr></thead>
           <tbody>${rows.map((m) => {
             const s = findStory(m.code);
@@ -767,7 +776,7 @@ export const adminScreens = [
       const rows = SCENE_DROPOFF[ctx.local.story] || [];
       const worst = rows.reduce((a, b) => (b.left / b.entered > a.left / a.entered ? b : a), rows[0]);
       return adminShell('admin-report-scenes', html`
-        ${pageHead('Rơi rụng theo trang', 'Chọn một truyện để xem người đọc dừng lại ở đâu.')}
+        ${pageHead('Rơi rụng theo trang', 'Chọn một truyện để xem người đọc dừng lại ở đâu.', null, 'trendingUp')}
         ${dateRangeBar(DATE_RANGE)}
         <div class="wn-row wn-row--wrap" style="margin:var(--wn-space-4) 0">
           ${Object.keys(SCENE_DROPOFF).map((code) => html`<button type="button"
@@ -806,7 +815,7 @@ export const adminScreens = [
       const d = CHOICE_DISTRIBUTION[ctx.local.story];
       const total = d.options.reduce((n, o) => n + o.count, 0);
       return adminShell('admin-report-choices', html`
-        ${pageHead('Phân bố lựa chọn', 'Chọn truyện, rồi xem một điểm rẽ.')}
+        ${pageHead('Phân bố lựa chọn', 'Chọn truyện, rồi xem một điểm rẽ.', null, 'gitBranch')}
         ${dateRangeBar(DATE_RANGE)}
         <div class="wn-row wn-row--wrap" style="margin:var(--wn-space-4) 0">
           ${Object.keys(CHOICE_DISTRIBUTION).map((code) => html`<button type="button"
@@ -841,10 +850,11 @@ export const adminScreens = [
     render() {
       const p = PROPOSAL_STATS;
       return adminShell('admin-report-proposals', html`
-        ${pageHead('Thống kê đề xuất', `${num(p.total)} đề xuất trong 30 ngày.`)}
+        ${pageHead('Thống kê đề xuất', `${num(p.total)} đề xuất trong 30 ngày.`, null, 'message')}
         ${dateRangeBar(DATE_RANGE)}
         <div class="wn-cols-3" style="margin:var(--wn-space-4) 0">
-          ${p.byStatus.map((s) => kpi(s.status, num(s.count), `${pct(s.count / p.total)} tổng số`))}
+          ${p.byStatus.map((s, i) => kpi(s.status, num(s.count), `${pct(s.count / p.total)} tổng số`,
+            ['clock', 'checkCircle', 'minus'][i]))}
         </div>
         <div class="wn-two-col">
           <div class="wn-card wn-stack-3">
@@ -873,12 +883,12 @@ export const adminScreens = [
     render() {
       const a = AUDIO_STATS;
       return adminShell('admin-report-audio', html`
-        ${pageHead('Sử dụng âm thanh', `${pct(a.coverage)} số trang đã có giọng kể.`)}
+        ${pageHead('Sử dụng âm thanh', `${pct(a.coverage)} số trang đã có giọng kể.`, null, 'volume')}
         ${dateRangeBar(DATE_RANGE)}
         <div class="wn-cols-3" style="margin:var(--wn-space-4) 0">
-          ${kpi('Độ phủ giọng kể', pct(a.coverage), 'trên tổng số trang đã xuất bản')}
-          ${kpi('Lượt phát', num(a.rows.reduce((n, r) => n + r.plays, 0)), 'trong 30 ngày')}
-          ${kpi('Lượt nghe lại', num(a.rows.reduce((n, r) => n + r.replays, 0)), 'người đọc bấm nghe lại')}
+          ${kpi('Độ phủ giọng kể', pct(a.coverage), 'trên tổng số trang đã xuất bản', 'volume')}
+          ${kpi('Lượt phát', num(a.rows.reduce((n, r) => n + r.plays, 0)), 'trong 30 ngày', 'play')}
+          ${kpi('Lượt nghe lại', num(a.rows.reduce((n, r) => n + r.replays, 0)), 'người đọc bấm nghe lại', 'refresh')}
         </div>
         <div class="wn-tablewrap"><table class="wn-table">
           <thead><tr><th>Truyện</th><th>Phát</th><th>Nghe lại</th><th>Nghe hết</th></tr></thead>

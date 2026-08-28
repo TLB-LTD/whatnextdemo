@@ -241,12 +241,12 @@ export const parentScreens = [
       const found = STRATEGIES.filter((s) => st.notebook[s.code]);
       const week = [22, 0, 16, 12, 0, 18, 16];
       return portalShell('summary', html`
-        ${pageHead('Tổng quan', `Hoạt động của ${KID.name} trong bảy ngày gần nhất.`)}
+        ${pageHead('Tổng quan', `Hoạt động của ${KID.name} trong bảy ngày gần nhất.`, null, 'barChart')}
         <div class="wn-cols-4">
-          ${kpi('Truyện đã đọc', '9', '3 truyện trong tuần này')}
-          ${kpi('Thời gian đọc', `${KID.minutesThisWeek} phút`, 'trung bình 12 phút mỗi lần')}
-          ${kpi('Cách đã khám phá', `${found.length} / ${STRATEGIES.length}`, 'ghi trong sổ chiến lược')}
-          ${kpi('Đề xuất đã gửi', String(PROPOSALS.length), '1 đang chờ đội nội dung')}
+          ${kpi('Truyện đã đọc', '9', '3 truyện trong tuần này', 'bookOpen')}
+          ${kpi('Thời gian đọc', `${KID.minutesThisWeek} phút`, 'trung bình 12 phút mỗi lần', 'clock')}
+          ${kpi('Cách đã khám phá', `${found.length} / ${STRATEGIES.length}`, 'ghi trong sổ chiến lược', 'handHeart')}
+          ${kpi('Đề xuất đã gửi', String(PROPOSALS.length), '1 đang chờ đội nội dung', 'message')}
         </div>
         <div class="wn-two-col">
           <div class="wn-card wn-stack-3">
@@ -299,7 +299,7 @@ export const parentScreens = [
       const kids = ctx.view === 'empty' ? [] : CHILDREN;
       return portalShell('children', html`
         ${pageHead('Hồ sơ trẻ', 'Tiến trình và sổ chiến lược của mỗi con là riêng biệt.',
-          btn('Thêm hồ sơ', { kind: 'primary', act: 'add', icon: 'plus' }))}
+          btn('Thêm hồ sơ', { kind: 'primary', act: 'add', icon: 'plus' }), 'users')}
         ${kids.length ? html`<div class="wn-cols-2">
           ${kids.map((c) => html`<div class="wn-card wn-stack-3">
             <div class="wn-row">
@@ -401,7 +401,7 @@ export const parentScreens = [
     init: () => ({}),
     render() {
       return portalShell('skills', html`
-        ${pageHead('Báo cáo kỹ năng', `Số lần ${KID.name} gặp từng nhóm tình huống trong 30 ngày.`)}
+        ${pageHead('Báo cáo kỹ năng', `Số lần ${KID.name} gặp từng nhóm tình huống trong 30 ngày.`, null, 'award')}
         ${banner('Con số ở đây nói về NỘI DUNG con đã gặp, không nói con giỏi hay kém. '
           + 'Một nhóm ít lần chỉ nghĩa là con chưa gặp nhiều tình huống loại đó.', 'info')}
         <div class="wn-two-col">
@@ -443,7 +443,7 @@ export const parentScreens = [
     render(ctx) {
       const rows = ctx.view === 'empty' ? [] : HISTORY;
       return portalShell('history', html`
-        ${pageHead('Lịch sử học', `Những gì ${KID.name} đã đọc, mới nhất trước.`)}
+        ${pageHead('Lịch sử học', `Những gì ${KID.name} đã đọc, mới nhất trước.`, null, 'clock')}
         ${rows.length ? html`<div class="wn-stack-3">
           ${rows.map((h) => {
             const s = findStory(h.storyCode);
@@ -482,7 +482,7 @@ export const parentScreens = [
         'Nhân vật phải nói ra điều mình cần trong một lớp học mới.',
         'Xoay quanh việc hỏi xin phép trước khi dùng đồ của người khác.'];
       return portalShell('suggest', html`
-        ${pageHead('Gợi ý nội dung', `Chọn theo nhóm tình huống ${KID.name} còn ít gặp.`)}
+        ${pageHead('Gợi ý nội dung', `Chọn theo nhóm tình huống ${KID.name} còn ít gặp.`, null, 'lightbulb')}
         <div class="wn-stack-3">
           ${items.map((s, i) => html`<div class="wn-card wn-row wn-row--top">
             <span style="width:78px;flex:none">${cover(s, { ratio: '34' })}</span>
@@ -522,7 +522,7 @@ export const parentScreens = [
       const active = rows.find((p) => p.id === ctx.local.open) || rows[0];
       return portalShell('proposals', html`
         ${pageHead('Đề xuất đã gửi', 'Mỗi đề xuất đều được đội nội dung đọc và trả lời.',
-          btn('Gửi đề xuất mới', { kind: 'primary', act: 'new', icon: 'plus' }))}
+          btn('Gửi đề xuất mới', { kind: 'primary', act: 'new', icon: 'plus' }), 'message')}
         ${rows.length ? html`<div class="wn-aside-col">
           <div class="wn-stack-2">
             ${rows.map((p) => {

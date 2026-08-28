@@ -13,6 +13,7 @@ import {
   html, icon, raw, art, artPlaceholder, btn, iconBtn, badge, banner, empty, avatar, relTime,
 } from 'wnd/ui.js';
 import { readerShell } from 'wnd/screens/_kit.js';
+import { CHILDREN } from 'wnd/data/people.js';
 import { CATEGORIES, AGE_BANDS } from 'wnd/data/catalog.js';
 import { TEMPLATES, UGC_STATUS, SUBMIT_RULES } from 'wnd/data/ugc.js';
 import { STRATEGIES, STRATEGY_BY_CODE } from 'wnd/data/strategies.js';
@@ -23,6 +24,7 @@ import {
 import { newSession, renderPlayer, playerAct } from 'wnd/flows/play.js';
 import { decorateStory } from 'wnd/data/catalog.js';
 
+const ME = CHILDREN[0];
 const STEPS = ['Thông tin', 'Trang truyện', 'Nhánh', 'Gửi'];
 
 function stepper(active) {
@@ -612,7 +614,7 @@ export const ugcScreens = [
     init: () => ({}),
     render(ctx) {
       const st = getState();
-      const mine = ctx.view === 'empty' ? [] : st.ugc.filter((u) => u.ownerName === 'Bống');
+      const mine = ctx.view === 'empty' ? [] : st.ugc.filter((u) => u.ownerName === ME.name);
       return readerShell({
         title: 'Sáng tác của tôi', back: 'back',
         actions: iconBtn('plus', { label: 'Tạo truyện mới', act: 'new' }),
@@ -660,8 +662,7 @@ export const ugcScreens = [
     live: true,
     init: () => ({ text: '' }),
     render(ctx) {
-      const st = getState();
-      const u = st.ugc.find((x) => x.id === 501) || st.ugc[0];
+      const u = threadStory();
       const s = UGC_STATUS[u.status];
       const canReply = u.status === 'needs_revision';
       return readerShell({
@@ -702,8 +703,7 @@ export const ugcScreens = [
       });
     },
     act(ctx, act, arg, e, el) {
-      const st = getState();
-      const u = st.ugc.find((x) => x.id === 501) || st.ugc[0];
+      const u = threadStory();
       if (act === '__field' && arg === 'reply') ctx.local.text = el.value;
       if (act === 'send') {
         const t = (ctx.local.text || '').trim();
@@ -723,6 +723,19 @@ export const ugcScreens = [
 ];
 
 /* --------------------------------------------------------------- mảnh dùng chung */
+
+/**
+ * Bản đang trao đổi = bản đang mở trong trình soạn, nếu không thì bản gần nhất của tác giả
+ * đang có tin từ đội duyệt. Ghim cứng một id là cách nhanh nhất để thread nói về truyện khác
+ * với truyện người xem vừa bấm.
+ */
+function threadStory() {
+  const st = getState();
+  return findUgc(st.composerId)
+    || st.ugc.find((u) => u.ownerName === ME.name && u.status === 'needs_revision')
+    || st.ugc.find((u) => u.ownerName === ME.name)
+    || st.ugc[0];
+}
 
 function sceneEditor(d, scene, i) {
   const targets = d.scenes.filter((s) => s.code !== scene.code);

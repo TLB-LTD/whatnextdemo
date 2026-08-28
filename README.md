@@ -37,7 +37,9 @@ index.html                shell + import map
 assets/css/tokens.css     biến CSS lấy từ nguồn token của sản phẩm
 assets/css/wn.css         lớp component của sản phẩm (thứ người dùng cuối thấy)
 assets/css/app.css        chrome của khung trưng bày
-assets/js/art.js          sinh tranh minh hoạ bằng SVG từ màu thể loại
+assets/js/art.js          bộ dựng tranh SVG: nguồn sáng, rim light, bóng tiếp đất,
+                          chiều sâu khí quyển, hạt nhiễu, nhân vật có hình hài
+assets/js/icons.js        105 icon inline, mỗi thể loại một icon riêng
 assets/js/registry.js     sổ đăng ký 70 màn, một hợp đồng chung
 assets/js/flows/          ba luồng có state thật: đọc · soạn · duyệt
 assets/js/screens/        định nghĩa từng màn, nhóm theo mặt phẳng đối tượng
@@ -61,9 +63,18 @@ duyệt; tranh minh hoạ là SVG sinh tại chỗ nên không có một tệp �
 
 ## Tự kiểm tra
 
-Mở `#/tu-kiem-tra` (không nằm trên thanh điều hướng): trang này gọi hàm dựng của cả 70 màn ở mọi
-trạng thái và báo số lỗi. Kỳ vọng: **0 lỗi**.
-Trang **Hệ thiết kế** tự tính lại 20 cặp tương phản WCAG mỗi lần mở. Kỳ vọng: **20/20 đạt**.
+```bash
+node scripts/check.mjs
+```
+
+Cổng tĩnh, không cần trình duyệt. Bắt ba loại lỗi mà trình duyệt im lặng bỏ qua: gọi icon chưa
+định nghĩa, điều hướng tới màn không tồn tại, và id cố định trong SVG (hai bức trên cùng một
+trang sẽ dùng chung gradient). Cũng bắt trùng Screen ID và tham chiếu truyện không có thật.
+
+Trong trình duyệt:
+
+- `#/tu-kiem-tra` — gọi hàm dựng của cả 70 màn ở mọi trạng thái và đếm lỗi. Kỳ vọng **0**.
+- **Hệ thiết kế** — tính lại 20 cặp tương phản WCAG mỗi lần mở. Kỳ vọng **20/20 đạt**.
 
 ## Triển khai
 

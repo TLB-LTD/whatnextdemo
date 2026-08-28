@@ -44,6 +44,17 @@ export const CATEGORIES = [
 
 export const CATEGORY_BY_CODE = Object.fromEntries(CATEGORIES.map((c) => [c.code, c]));
 
+/** Mỗi thể loại một icon riêng — chip thể loại không còn là mười bảy viên thuốc giống nhau. */
+export const CATEGORY_ICON = {
+  adventure: 'map', puzzle_mystery: 'key', horror: 'ghost', fantasy: 'wand',
+  realistic: 'home', science: 'flask', history_culture: 'landmark', eq: 'smile',
+  social: 'users', habits_safety: 'shieldCheck', nature: 'leaf', creativity: 'palette',
+  humor: 'laugh', bedtime: 'moonStar', nonfiction: 'fileText',
+  children_skills: 'handHeart', romance: 'heart',
+};
+
+export const categoryIcon = (code) => CATEGORY_ICON[code] || 'bookOpen';
+
 /** Sở thích trong onboarding — gom thành ba nhóm để trẻ không phải đọc 17 dòng. */
 export const INTEREST_GROUPS = [
   { name: 'Kỹ năng', tags: ['Cảm xúc', 'Giao tiếp', 'An toàn', 'Bạn bè'] },

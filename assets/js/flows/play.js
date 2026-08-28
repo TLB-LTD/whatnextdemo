@@ -59,7 +59,7 @@ export function renderPlayer(ctx, sess, story, o = {}) {
   const ending = sess.ending ? story.endingByCode[sess.ending] : null;
   return html`<div class="wn-player">
     <div class="wn-player__top">
-      ${iconBtn('chevronLeft', { label: 'Thoát truyện', act: 'exit' })}
+      ${iconBtn('chevronLeft', { label: 'Thoát truyện', act: ending ? 'exit' : 'exit-ask' })}
       <div style="flex:1;min-width:0">
         ${progressSegments(story.totalScenes, ending ? story.totalScenes : sess.step)}
         <div class="wn-micro" style="margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
@@ -73,6 +73,7 @@ export function renderPlayer(ctx, sess, story, o = {}) {
     ${sess.flash ? html`<div class="wn-chipflash" role="status">${icon('sparkles')}Cách mới: ${sess.flash}</div>` : ''}
     ${sess.sheet === 'proposal' ? proposalSheet(sess) : ''}
     ${sess.sheet === 'menu' ? menuSheet() : ''}
+    ${sess.sheet === 'exit' ? exitSheet() : ''}
   </div>`;
 }
 
@@ -133,7 +134,7 @@ function endingView(ctx, sess, story, ending, o) {
   return html`<div class="wn-player__body wn-scenefade" id="wn-ending">
     <div class="wn-player__stage">
       ${art({ seed: story.code + ending.code, motif: ending.art?.motif, time: ending.art?.time,
-              tint: o.tint, alt: `Minh hoạ đoạn kết ${ending.title}` })}
+              tint: o.tint, hero: true, alt: `Minh hoạ đoạn kết ${ending.title}` })}
       <div class="wn-player__scrim">
         <span class="wn-badge ${ending.isPositive ? 'wn-badge--success' : 'wn-badge--neutral'}"
           style="margin-bottom:10px">${icon(ending.isPositive ? 'award' : 'flag')}${ending.title}</span>
@@ -203,6 +204,23 @@ function proposalSheet(sess) {
     </div>`;
 }
 
+function exitSheet() {
+  return html`<div class="wn-scrim" data-act="close-sheet"></div>
+    <div class="wn-sheet" role="dialog" aria-modal="true" aria-label="Thoát truyện">
+      <div class="wn-sheet__handle"></div>
+      <div class="wn-stack">
+        <div class="wn-stack-1">
+          <b class="wn-title">Thoát truyện?</b>
+          <span class="wn-caption">Con đang đọc dở. Thoát bây giờ thì lần sau bắt đầu lại từ đầu.</span>
+        </div>
+        <div class="wn-stack-2">
+          ${btn('Đọc tiếp', { kind: 'primary', block: true, act: 'close-sheet' })}
+          ${btn('Thoát', { kind: 'secondary', block: true, act: 'exit' })}
+        </div>
+      </div>
+    </div>`;
+}
+
 function menuSheet() {
   return html`<div class="wn-scrim" data-act="close-sheet"></div>
     <div class="wn-sheet" role="dialog" aria-modal="true" aria-label="Thêm">
@@ -224,8 +242,9 @@ export function playerAct(ctx, sess, story, act, arg, o = {}, el = null) {
       const scene = sceneOf(story, sess);
       const choice = (scene.choices || [])[Number(arg)];
       if (!choice) {
-        /* Trang không có lựa chọn: nút "Tiếp tục" đi thẳng tới đoạn kết của trang đó. */
-        if (scene.isEnding || scene.endingCode) { finish(ctx, sess, story, scene.endingCode, o); }
+        /* Trang không có lựa chọn. Nếu là trang kết thì đóng truyện; nếu không, đó là một
+           nhánh tác giả bỏ dở — vẫn phải đưa người đọc tới một đoạn kết chứ không để chết đứng. */
+        finish(ctx, sess, story, scene.endingCode || (story.endings[0] || {}).code, o);
         return true;
       }
       sess.picked = Number(arg);
@@ -274,6 +293,13 @@ export function playerAct(ctx, sess, story, act, arg, o = {}, el = null) {
     }
 
     case 'menu': sess.sheet = 'menu'; ctx.rerender(); return true;
+
+    case 'exit-ask':
+      /* Đang đọc dở thì hỏi lại — thoát nhầm giữa truyện là mất cả mạch. */
+      if (sess.ending) return false;
+      sess.sheet = 'exit';
+      ctx.rerender();
+      return true;
     case 'open-proposal': sess.sheet = 'proposal'; ctx.rerender(); return true;
     case 'close-sheet': sess.sheet = null; ctx.rerender(); return true;
 
