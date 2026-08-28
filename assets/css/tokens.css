@@ -1,0 +1,166 @@
+/* ---------------------------------------------------------------------------
+   Token WhatNext — giá trị lấy nguyên từ nguồn token duy nhất của sản phẩm.
+   Hợp đồng theme giống hệt web: html[data-theme="light" | "dark" | "system"].
+   Sửa màu ở đây là lệch khỏi sản phẩm — đừng sửa lẻ.
+   --------------------------------------------------------------------------- */
+
+:root {
+  /* Ramp thương hiệu — toàn bộ nằm trên hue 209 */
+  --wn-accent50:  #EFF7FE;
+  --wn-accent100: #DCEDFD;
+  --wn-accent200: #BBDCFB;
+  --wn-accent300: #8AC5F8;
+  --wn-accent400: #3D9CF5;
+  --wn-accent500: #2B8AE8;
+  --wn-accent600: #1B75C9;
+  --wn-accent700: #145C9E;
+  --wn-accent800: #134E85;
+  --wn-accent900: #13416E;
+
+  /* Màu thể loại — dùng cho nút lựa chọn trong trình phát và tranh sinh SVG */
+  --wn-genre-adventure: #EA580C;
+  --wn-genre-mystery:   #7C3AED;
+  --wn-genre-horror:    #991B1B;
+  --wn-genre-puzzle:    #0D9488;
+
+  /* Khoảng cách — base 4 kèm nửa bước */
+  --wn-space-0\.5: 2px;
+  --wn-space-1:    4px;
+  --wn-space-1\.5: 6px;
+  --wn-space-2:    8px;
+  --wn-space-2\.5: 10px;
+  --wn-space-3:    12px;
+  --wn-space-4:    16px;
+  --wn-space-4\.5: 18px;
+  --wn-space-5:    20px;
+  --wn-space-5\.5: 22px;
+  --wn-space-6:    24px;
+  --wn-space-8:    32px;
+  --wn-space-10:   40px;
+  --wn-space-12:   48px;
+  --wn-space-16:   64px;
+
+  --wn-radius-sm:   8px;
+  --wn-radius-md:   12px;
+  --wn-radius-lg:   16px;
+  --wn-radius-xl:   24px;
+  --wn-radius-pill: 999px;
+
+  --wn-motion-fast:  150ms;
+  --wn-motion-base:  250ms;
+  --wn-motion-scene: 400ms;
+  --wn-motion-toast: 1200ms;
+  --wn-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Thang chữ — hai vai, một thang */
+  --wn-text-display:      32px;
+  --wn-text-headline:     24px;
+  --wn-text-title:        20px;
+  --wn-text-reader-body:  18px;
+  --wn-text-body:         16px;
+  --wn-text-body-compact: 15px;
+  --wn-text-label:        14px;
+  --wn-text-caption:      13px;
+  --wn-text-micro:        12px;
+
+  --wn-font: "Noto Sans", ui-sans-serif, system-ui, "Segoe UI", Roboto,
+             "Helvetica Neue", Arial, sans-serif;
+
+  /* Mặc định = sáng */
+  --wn-bg: #F0F4FA;
+  --wn-surface: #FFFFFF;
+  --wn-surface-raised: #FFFFFF;
+  --wn-text: #0F172A;
+  --wn-text-secondary: #475569;
+  --wn-muted: #5C6B7A;
+  --wn-border: #E2E8F0;
+  --wn-border-strong: #7C8CA0;
+  --wn-accent: #1B75C9;
+  --wn-accent-hover: #145C9E;
+  --wn-on-accent: #FFFFFF;
+  --wn-brand: #3D9CF5;
+  --wn-focus: #1B75C9;
+  --wn-success: #047857;
+  --wn-warning: #B45309;
+  --wn-danger: #B91C1C;
+  --wn-info: #1B75C9;
+  --wn-shadow-card: 0 4px 24px rgba(15, 23, 42, 0.06);
+  --wn-shadow-raised: 0 12px 32px rgba(15, 23, 42, 0.12);
+}
+
+html[data-theme="light"] {
+  --wn-bg: #F0F4FA;
+  --wn-surface: #FFFFFF;
+  --wn-surface-raised: #FFFFFF;
+  --wn-text: #0F172A;
+  --wn-text-secondary: #475569;
+  --wn-muted: #5C6B7A;
+  --wn-border: #E2E8F0;
+  --wn-border-strong: #7C8CA0;
+  --wn-accent: #1B75C9;
+  --wn-accent-hover: #145C9E;
+  --wn-on-accent: #FFFFFF;
+  --wn-brand: #3D9CF5;
+  --wn-focus: #1B75C9;
+  --wn-success: #047857;
+  --wn-warning: #B45309;
+  --wn-danger: #B91C1C;
+  --wn-info: #1B75C9;
+  --wn-shadow-card: 0 4px 24px rgba(15, 23, 42, 0.06);
+  --wn-shadow-raised: 0 12px 32px rgba(15, 23, 42, 0.12);
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  --wn-bg: #0F1419;
+  --wn-surface: #1A222D;
+  --wn-surface-raised: #212B38;
+  --wn-text: #F1F5F9;
+  --wn-text-secondary: #CBD5E1;
+  --wn-muted: #94A3B8;
+  --wn-border: #334155;
+  --wn-border-strong: #64748B;
+  --wn-accent: #3D9CF5;
+  --wn-accent-hover: #8AC5F8;
+  --wn-on-accent: #0F1419;
+  --wn-brand: #3D9CF5;
+  --wn-focus: #3D9CF5;
+  --wn-success: #34D399;
+  --wn-warning: #FBBF24;
+  --wn-danger: #F87171;
+  --wn-info: #3D9CF5;
+  --wn-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.35);
+  --wn-shadow-raised: 0 12px 32px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="system"] {
+    --wn-bg: #0F1419;
+    --wn-surface: #1A222D;
+    --wn-surface-raised: #212B38;
+    --wn-text: #F1F5F9;
+    --wn-text-secondary: #CBD5E1;
+    --wn-muted: #94A3B8;
+    --wn-border: #334155;
+    --wn-border-strong: #64748B;
+    --wn-accent: #3D9CF5;
+    --wn-accent-hover: #8AC5F8;
+    --wn-on-accent: #0F1419;
+    --wn-brand: #3D9CF5;
+    --wn-focus: #3D9CF5;
+    --wn-success: #34D399;
+    --wn-warning: #FBBF24;
+    --wn-danger: #F87171;
+    --wn-info: #3D9CF5;
+    --wn-shadow-card: 0 4px 24px rgba(0, 0, 0, 0.35);
+    --wn-shadow-raised: 0 12px 32px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+
+@media (prefers-color-scheme: light) {
+  html[data-theme="system"] {
+    color-scheme: light;
+  }
+}

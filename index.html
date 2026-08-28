@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="vi" data-theme="system">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rồi Sao Nữa (WhatNext) — Demo sản phẩm</title>
+<meta name="description" content="Demo tương tác của Rồi Sao Nữa (WhatNext) — nền tảng học kỹ năng sống qua truyện có lựa chọn cho trẻ 6–10 tuổi. 70 màn hình, 6 mặt phẳng đối tượng, 3 luồng bấm được thật.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Rồi Sao Nữa (WhatNext) — Demo sản phẩm">
+<meta property="og:description" content="70 màn hình, 6 mặt phẳng đối tượng, 3 luồng tương tác: trẻ đọc → tác giả soạn → biên tập duyệt.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%233D9CF5'/%3E%3Cpath d='M8 11h4l2 7 2-7h3l2 7 2-7h4l-4 12h-4l-1.5-5-1.5 5h-4z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+<script>
+/* Chống nháy theme: chạy trước khi vẽ. Cùng hợp đồng với sản phẩm: html[data-theme]. */
+(function () {
+  try {
+    var t = localStorage.getItem('wnd_theme');
+    document.documentElement.dataset.theme = (t === 'light' || t === 'dark') ? t : 'system';
+  } catch (e) { document.documentElement.dataset.theme = 'system'; }
+})();
+</script>
+<link rel="stylesheet" href="./assets/css/tokens.css">
+<link rel="stylesheet" href="./assets/css/wn.css">
+<link rel="stylesheet" href="./assets/css/app.css">
+</head>
+<body>
+<a class="skip-link" href="#wnd-stage">Bỏ qua đến nội dung</a>
+
+<header class="wnd-topbar" id="wnd-topbar">
+  <a class="wnd-wordmark" href="#/tong-quan" aria-label="Rồi Sao Nữa — về trang tổng quan">
+    <svg class="wnd-wordmark__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+      <rect width="32" height="32" rx="9" fill="var(--wn-brand)"></rect>
+      <path d="M7 10.5h3.7l1.9 6.6 1.9-6.6h2.8l1.9 6.6 1.9-6.6H25l-3.8 11.5h-3.7L16 16.3l-1.5 5.7h-3.7z" fill="#fff"></path>
+    </svg>
+    <span class="wnd-wordmark__text">
+      <b>Rồi Sao Nữa</b>
+      <span>WhatNext · Demo sản phẩm</span>
+    </span>
+  </a>
+
+  <nav class="wnd-sections" id="wnd-sections" aria-label="Phần chính"></nav>
+
+  <div class="wnd-topbar__tools">
+    <div class="wnd-segmented" id="wnd-viewport" role="group" aria-label="Khổ màn hình"></div>
+    <div class="wnd-segmented" id="wnd-theme" role="group" aria-label="Giao diện"></div>
+    <button class="wnd-iconbtn wnd-menu-toggle" id="wnd-menu-toggle" type="button"
+            aria-expanded="false" aria-controls="wnd-rail" aria-label="Mở danh sách màn hình"></button>
+  </div>
+</header>
+
+<div class="wnd-body">
+  <aside class="wnd-rail" id="wnd-rail" aria-label="Danh sách màn hình" hidden></aside>
+  <main class="wnd-stage" id="wnd-stage" tabindex="-1"></main>
+</div>
+
+<div class="wnd-toasts" id="wnd-toasts" aria-live="polite" aria-atomic="false"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "wnd/": "./assets/js/"
+  }
+}
+</script>
+<script type="module" src="./assets/js/app.js"></script>
+<noscript>
+  <div class="wnd-noscript">
+    Demo này cần JavaScript để mô phỏng luồng tương tác. Hãy bật JavaScript rồi tải lại trang.
+  </div>
+</noscript>
+</body>
+</html>
