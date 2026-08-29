@@ -90,8 +90,19 @@ function renderRail(activeId) {
 function showRail(show, activeId) {
   rail.hidden = !show;
   if (show) renderRail(activeId);
-  rail.classList.remove('is-open');
+  setRail(false);
   qs('#wnd-menu-toggle').style.display = show ? '' : 'none';
+}
+
+/** Ngăn kéo và lớp mờ của nó luôn đi cùng nhau — một chỗ bật tắt, không hai. */
+function setRail(open) {
+  rail.classList.toggle('is-open', open);
+  qs('#wnd-rail-scrim').classList.toggle('is-on', open);
+  qs('#wnd-menu-toggle').setAttribute('aria-expanded', String(open));
+}
+
+function railOpen() {
+  return rail.classList.contains('is-open');
 }
 
 /* -------------------------------------------------------- sân khấu màn hình */
@@ -106,8 +117,26 @@ function frameFor(screen) {
   return viewport();
 }
 
-function screenHost(screen, opts = {}) {
+/**
+ * Khổ HIỆU DỤNG — bề rộng khung thật sự có được, không phải bề rộng người dùng chọn.
+ *
+ * CSS trong khung phản ứng theo `@container`, tức bề rộng THẬT. JS của màn lại rẽ nhánh bố cục
+ * theo `ctx.viewport`. Hai nguồn sự thật này lệch nhau ngay khi cửa sổ hẹp hơn khổ đã chọn —
+ * một điện thoại 360px vẫn báo 'd', và màn soạn truyện sẽ chọn bố cục hai cột 360px + 1fr cho
+ * một khung ba trăm pixel. Kẹp lại ở đây, một lần, cho cả 70 màn.
+ */
+function effectiveFrame(screen) {
   const vp = frameFor(screen);
+  const pad = parseFloat(
+    getComputedStyle(document.documentElement).getPropertyValue('--wnd-canvas-pad'),
+  ) || 0;
+  const room = stage.clientWidth - pad * 2;
+  const w = room > 0 ? Math.min(vp.w, Math.round(room)) : vp.w;
+  return { ...vp, w, id: w < 768 ? 'm' : w < 1024 ? 't' : 'd' };
+}
+
+function screenHost(screen, opts = {}) {
+  const vp = effectiveFrame(screen);
   const ctx = {
     screen,
     local: screen.init({ state: getState(), viewport: vp.id }) || {},
@@ -162,7 +191,7 @@ function paintFrame(ctx) {
 }
 
 function frameMarkup(ctx) {
-  const vp = frameFor(ctx.screen);
+  const vp = effectiveFrame(ctx.screen);
   return html`<div class="wnd-frame" style="--wnd-frame-w:${vp.w}px">
     <div class="wnd-frame__chrome">
       <span class="wnd-frame__dots"><i></i><i></i><i></i></span>
@@ -226,7 +255,7 @@ function renderRoleFlow(roleId) {
   const screen = SCREEN_BY_ID[cfg.screenId];
   const ctx = screenHost(screen, { embedded: true });
   mount(stage, html`<div class="wnd-canvaswrap">
-    <div class="wnd-caption" style="max-width:${frameFor(screen).w}px">
+    <div class="wnd-caption" style="max-width:${effectiveFrame(screen).w}px">
       <div class="wnd-caption__main">
         <div class="wnd-caption__title">${cfg.title}</div>
         <div class="wnd-caption__desc">${cfg.desc}</div>
@@ -238,7 +267,7 @@ function renderRoleFlow(roleId) {
       </div>
     </div>
     ${frameMarkup(ctx)}
-    <div class="wnd-caption" style="max-width:${frameFor(screen).w}px">
+    <div class="wnd-caption" style="max-width:${effectiveFrame(screen).w}px">
       <div class="wnd-caption__main">
         <div class="wn-label" style="margin-bottom:6px">Thử lần lượt</div>
         <ol class="wnd-role__steps">${cfg.steps.map((s) => html`<li>${icon('check')}<span>${s}</span></li>`)}</ol>
@@ -313,6 +342,13 @@ function bind() {
   document.addEventListener('keydown', (e) => {
     const frame = qs('#wnd-frame-viewport');
 
+    if (e.key === 'Escape' && railOpen()) {
+      e.preventDefault();
+      setRail(false);
+      qs('#wnd-menu-toggle').focus();
+      return;
+    }
+
     if (e.key === 'Escape' && host && frame && overlayIn(frame)) {
       e.preventDefault();
       host.screen.act(host, 'close-sheet', null, e, null);
@@ -366,12 +402,9 @@ function bind() {
     router.resolve();
   });
 
-  on(document, 'click', '#wnd-menu-toggle', () => {
-    const open = rail.classList.toggle('is-open');
-    qs('#wnd-menu-toggle').setAttribute('aria-expanded', String(open));
-  });
-
-  on(document, 'click', '.wnd-rail a', () => rail.classList.remove('is-open'));
+  on(document, 'click', '#wnd-menu-toggle', () => setRail(!railOpen()));
+  on(document, 'click', '#wnd-rail-scrim', () => setRail(false));
+  on(document, 'click', '.wnd-rail a', () => setRail(false));
 
   /* Lọc rail theo tên */
   document.addEventListener('input', (e) => {
@@ -407,6 +440,17 @@ function bind() {
   document.addEventListener('submit', (e) => {
     if (!host || !e.target.closest('#wnd-frame-viewport')) return;
     e.preventDefault();
+  });
+
+  /* Cửa sổ đổi bề rộng → khổ hiệu dụng có thể sang bậc khác. Chỉ vẽ lại khi ĐỔI BẬC: vẽ lại là
+     chạy lại `screen.init()`, tức xoá sạch phiên đọc dở — quá đắt để trả cho mỗi pixel. */
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (!host || effectiveFrame(host.screen).id === host.viewport) return;
+      router.resolve();
+    }, 160);
   });
 
   /* Đổi theme hệ thống → tranh SVG phải vẽ lại theo bảng màu mới */

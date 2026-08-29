@@ -10,7 +10,7 @@
  */
 
 import {
-  html, icon, raw, art, artPlaceholder, btn, iconBtn, badge, banner, empty, avatar, relTime,
+  html, icon, raw, art, artPlaceholder, btn, iconBtn, badge, banner, empty, avatar, relTime, sheet,
 } from 'wnd/ui.js';
 import { readerShell } from 'wnd/screens/_kit.js';
 import { CHILDREN } from 'wnd/data/people.js';
@@ -258,8 +258,8 @@ export const ugcScreens = [
       if (act === 'sheet') { ctx.local.sheet = arg; ctx.rerender(); }
       if (act === 'close-sheet') { ctx.local.sheet = null; ctx.rerender(); }
       if (act === 'cover') { patchUgc(d.id, { hasCover: true }); ctx.toast('Đã chọn bìa và cắt về tỉ lệ 9:16.'); }
-      if (act === 'cat') { patchUgc(d.id, { categoryCode: arg }); }
-      if (act === 'band') { patchUgc(d.id, { ageBandCode: arg }); }
+      if (act === 'cat') { ctx.local.sheet = null; patchUgc(d.id, { categoryCode: arg }); }
+      if (act === 'band') { ctx.local.sheet = null; patchUgc(d.id, { ageBandCode: arg }); }
       if (act === '__field') {
         /* Ghi thẳng vào kho, KHÔNG vẽ lại — nếu vẽ lại thì caret nhảy về đầu ô. */
         const patch = {};
@@ -331,11 +331,11 @@ export const ugcScreens = [
           <div class="wn-sticky-cta">
             ${btn('Đi đến trang kết thúc', { kind: 'primary', block: true, act: 'branches', icon: 'gitBranch' })}
           </div>
-          ${ctx.local.sheet === 'edit' ? html`<div class="wn-scrim" data-act="close-sheet"></div>
-            <div class="wn-sheet" role="dialog" aria-modal="true" aria-label="Chữ và lựa chọn">
-              <div class="wn-sheet__handle"></div>${editor}
-              ${btn('Xong', { kind: 'primary', block: true, act: 'close-sheet', cls: 'wn-stack' })}
-            </div>` : ''}
+          ${ctx.local.sheet === 'edit'
+            ? sheet(html`<div class="wn-stack">${editor}
+                ${btn('Xong', { kind: 'primary', block: true, act: 'close-sheet' })}</div>`,
+              { label: 'Chữ và lựa chọn' })
+            : ''}
           ${ctx.local.sheet === 'toc' ? tocSheet(d, i) : ''}`,
       });
     },
@@ -675,7 +675,8 @@ export const ugcScreens = [
           </div>` : ''}
 
           <div class="wn-thread">
-            ${u.thread.map((m) => html`<div class="wn-msg wn-msg--${m.role}">
+            ${u.thread.map((m) => html`<div class="wn-msg ${
+              m.role === 'author' ? 'wn-msg--mine' : m.role === 'system' ? 'wn-msg--system' : ''}">
               ${m.role !== 'system' ? html`<span class="wn-msg__meta">
                 ${m.role === 'staff' ? `${m.author} · Đội duyệt` : 'Con'} · ${relTime(m.at)}</span>` : ''}
               <div class="wn-msg__bubble">
@@ -794,11 +795,63 @@ function sceneEditor(d, scene, i) {
   </div>`;
 }
 
+/**
+ * Bốn ô thông tin của bản nháp, mỗi ô một sheet.
+ *
+ * Ở khổ hẹp, bìa 9:16 là nhân vật chính của màn — nên form không nằm cạnh bìa mà trượt lên đè
+ * lên nó. Dùng đúng `data-field` của form khổ rộng, nên chữ gõ ở đâu cũng vào cùng một chỗ.
+ */
+function metaSheet(ctx, d) {
+  const parts = {
+    title: {
+      label: 'Tên truyện',
+      body: () => html`<div class="wn-field">
+        <label for="s-title">Tên truyện</label>
+        <input class="wn-input" id="s-title" data-field="title" value="${d.title}"
+          placeholder="Ví dụ: Cái kẹo cuối cùng">
+      </div>`,
+    },
+    desc: {
+      label: 'Mô tả ngắn',
+      body: () => html`<div class="wn-field">
+        <label for="s-desc">Mô tả ngắn</label>
+        <textarea class="wn-textarea" id="s-desc" rows="3" data-field="description"
+          placeholder="Một câu để người đọc biết truyện nói về chuyện gì.">${d.description}</textarea>
+      </div>`,
+    },
+    cat: {
+      label: 'Thể loại',
+      body: () => html`<div class="wn-stack-2">
+        <b class="wn-label">Thể loại</b>
+        <div class="wn-row wn-row--wrap">
+          ${CATEGORIES.slice(0, 10).map((c) => html`<button type="button"
+            class="wn-chip ${d.categoryCode === c.code ? 'is-on' : ''}" data-act="cat" data-arg="${c.code}"
+            aria-pressed="${d.categoryCode === c.code ? 'true' : 'false'}">${c.name}</button>`)}
+        </div>
+      </div>`,
+    },
+    band: {
+      label: 'Truyện dành cho',
+      body: () => html`<div class="wn-stack-2">
+        <b class="wn-label">Truyện dành cho</b>
+        <div class="wn-row wn-row--wrap">
+          ${AGE_BANDS.slice(0, 3).map((b) => html`<button type="button"
+            class="wn-chip ${d.ageBandCode === b.code ? 'is-on' : ''}" data-act="band" data-arg="${b.code}"
+            aria-pressed="${d.ageBandCode === b.code ? 'true' : 'false'}">${b.label}</button>`)}
+        </div>
+      </div>`,
+    },
+  };
+  const part = parts[ctx.local.sheet];
+  if (!part) return '';
+  return sheet(html`<div class="wn-stack">
+    ${part.body()}
+    ${btn('Xong', { kind: 'primary', block: true, act: 'close-sheet' })}
+  </div>`, { label: part.label });
+}
+
 function tocSheet(d, active) {
-  return html`<div class="wn-scrim" data-act="close-sheet"></div>
-    <div class="wn-sheet" role="dialog" aria-modal="true" aria-label="Mục lục trang">
-      <div class="wn-sheet__handle"></div>
-      <div class="wn-stack-2">
+  return sheet(html`<div class="wn-stack-2">
         <b class="wn-label">Các trang trong truyện</b>
         ${d.scenes.map((s, i) => html`<button type="button" class="wn-card wn-card--flat wn-row"
           data-act="goto" data-arg="${i}" style="cursor:pointer;width:100%;text-align:left;
@@ -811,8 +864,7 @@ function tocSheet(d, active) {
           </span>
           ${s.isStart ? badge('Mở đầu', 'info', 'flag') : ''}
         </button>`)}
-      </div>
-    </div>`;
+      </div>`, { label: 'Mục lục trang' });
 }
 
 /** Đổi bản nháp sang hình dạng một truyện để trình phát chạy được không cần sửa gì. */

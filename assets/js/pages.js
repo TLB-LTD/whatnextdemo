@@ -22,7 +22,7 @@ export function overviewPage() {
       <p class="wnd-lede">Trẻ 6–10 tuổi được đặt vào một tình huống có thật trong đời sống, tự chọn
         cách xử lý, rồi thấy điều gì đến sau lựa chọn đó. Không chấm điểm, không xếp hạng, không so
         con này với con kia — thứ trẻ mang về là <b>cách xử lý mà trẻ đã tự tìm ra</b>.</p>
-      <div class="wnd-row wnd-row--wrap">
+      <div class="wn-row wn-row--wrap">
         <a class="wn-btn wn-btn--primary" href="#/ba-vai/nguoi-xem">${icon('play')}Chơi thử một truyện</a>
         <a class="wn-btn wn-btn--outline" href="#/man-hinh">${icon('grid')}Xem ${SCREENS.length} màn hình</a>
       </div>

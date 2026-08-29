@@ -3,6 +3,8 @@
    để người xem luôn phân biệt được "đây là khung trưng bày" và "đây là sản phẩm".
    --------------------------------------------------------------------------- */
 
+/* Hai con số này CSS và JS cùng đọc — đừng để chúng tách ra hai nơi. */
+:root { --wnd-topbar-h: 60px; --wnd-canvas-pad: 24px; }
 html, body { height: 100%; }
 body {
   margin: 0;
@@ -45,7 +47,7 @@ body {
   background: color-mix(in srgb, var(--wn-surface) 88%, transparent);
   backdrop-filter: saturate(1.4) blur(10px);
   border-bottom: 1px solid var(--wn-border);
-  min-height: 60px;
+  min-height: var(--wnd-topbar-h);
 }
 
 .wnd-wordmark { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; flex: none; }
@@ -58,8 +60,8 @@ body {
 .wnd-sections { display: flex; gap: 2px; flex: 1 1 auto; min-width: 0; overflow-x: auto; scrollbar-width: none; }
 .wnd-sections::-webkit-scrollbar { display: none; }
 .wnd-sections a {
-  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
-  padding: 8px 13px; border-radius: var(--wn-radius-pill);
+  display: inline-flex; align-items: center; gap: var(--wn-space-2); white-space: nowrap;
+  padding: var(--wn-space-2) var(--wn-space-3); border-radius: var(--wn-radius-pill);
   font-size: var(--wn-text-caption); font-weight: 600; color: var(--wn-text-secondary);
   text-decoration: none; transition: background-color var(--wn-motion-fast) var(--wn-easing),
                                      color var(--wn-motion-fast) var(--wn-easing);
@@ -73,7 +75,7 @@ body {
 .wnd-topbar__tools { display: flex; align-items: center; gap: var(--wn-space-2); flex: none; }
 
 .wnd-segmented {
-  display: inline-flex; gap: 2px; padding: 3px;
+  display: inline-flex; gap: var(--wn-space-0\.5); padding: var(--wn-space-1);
   background: color-mix(in srgb, var(--wn-border) 45%, transparent);
   border-radius: var(--wn-radius-pill);
 }
@@ -115,19 +117,19 @@ body {
 .wnd-rail__group { padding: var(--wn-space-2) 0; }
 .wnd-rail__grouphead {
   display: flex; align-items: center; gap: 8px; width: 100%;
-  padding: 7px var(--wn-space-4); border: 0; background: transparent; cursor: pointer;
+  padding: var(--wn-space-2) var(--wn-space-4); border: 0; background: transparent; cursor: pointer;
   font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
   color: var(--wn-muted); text-align: left;
 }
 .wnd-rail__grouphead .wnd-count {
   margin-left: auto; font-size: 11px; letter-spacing: 0; font-weight: 600;
   background: color-mix(in srgb, var(--wn-border) 60%, transparent);
-  color: var(--wn-text-secondary); border-radius: 999px; padding: 1px 7px;
+  color: var(--wn-text-secondary); border-radius: var(--wn-radius-pill); padding: var(--wn-space-0\.5) var(--wn-space-2);
 }
 .wnd-rail__grouphead .wnd-dot { width: 8px; height: 8px; border-radius: 999px; flex: none; }
 .wnd-rail a {
   display: flex; align-items: center; gap: 8px;
-  padding: 8px var(--wn-space-4) 8px 30px; text-decoration: none;
+  padding: var(--wn-space-2) var(--wn-space-4) var(--wn-space-2) var(--wn-space-8); text-decoration: none;
   font-size: var(--wn-text-caption); color: var(--wn-text-secondary);
   border-left: 2px solid transparent;
 }
@@ -157,7 +159,8 @@ body {
     linear-gradient(180deg, color-mix(in srgb, var(--wn-accent) 4%, var(--wn-bg)), var(--wn-bg) 320px);
 }
 
-.wnd-canvaswrap { padding: var(--wn-space-6) var(--wn-space-6) var(--wn-space-12); display: grid; justify-items: center; gap: var(--wn-space-4); }
+.wnd-canvaswrap { padding: var(--wnd-canvas-pad) var(--wnd-canvas-pad) var(--wn-space-12);
+  display: grid; justify-items: center; gap: var(--wn-space-4); }
 
 .wnd-frame {
   width: 100%; max-width: var(--wnd-frame-w, 1280px);
@@ -170,10 +173,10 @@ body {
 }
 .wnd-frame__chrome {
   display: flex; align-items: center; gap: 8px;
-  padding: 8px 14px; background: var(--wn-surface); border-bottom: 1px solid var(--wn-border);
+  padding: var(--wn-space-2) var(--wn-space-4); background: var(--wn-surface); border-bottom: 1px solid var(--wn-border);
   font-size: 11px; color: var(--wn-muted); font-weight: 600;
 }
-.wnd-frame__dots { display: flex; gap: 5px; }
+.wnd-frame__dots { display: flex; gap: var(--wn-space-1\.5); }
 .wnd-frame__dots i { width: 9px; height: 9px; border-radius: 999px; background: var(--wn-border-strong); opacity: 0.55; }
 .wnd-frame__url {
   flex: 1 1 auto; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -202,13 +205,14 @@ body {
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-size: 11px; letter-spacing: 0.02em;
   background: color-mix(in srgb, var(--wn-border) 55%, transparent);
-  color: var(--wn-text-secondary); padding: 2px 8px; border-radius: 6px;
+  color: var(--wn-text-secondary); padding: var(--wn-space-0\.5) var(--wn-space-2);
+  border-radius: var(--wn-radius-sm);
 }
-.wnd-statebar { display: flex; gap: 4px; padding: 3px; border-radius: var(--wn-radius-pill);
+.wnd-statebar { display: flex; gap: var(--wn-space-1); padding: var(--wn-space-1); border-radius: var(--wn-radius-pill);
   background: color-mix(in srgb, var(--wn-border) 45%, transparent); }
 .wnd-statebar button {
   border: 0; background: transparent; border-radius: var(--wn-radius-pill); cursor: pointer;
-  padding: 5px 11px; font-size: var(--wn-text-micro); font-weight: 600; color: var(--wn-text-secondary);
+  padding: var(--wn-space-1\.5) var(--wn-space-3); font-size: var(--wn-text-micro); font-weight: 600; color: var(--wn-text-secondary);
 }
 .wnd-statebar button[aria-pressed="true"] { background: var(--wn-surface); color: var(--wn-accent); }
 
@@ -234,7 +238,7 @@ body {
 .wnd-eyebrow {
   display: inline-flex; align-items: center; gap: 8px; align-self: start;
   justify-self: start;
-  padding: 5px 13px; border-radius: 999px;
+  padding: var(--wn-space-1\.5) var(--wn-space-3); border-radius: var(--wn-radius-pill);
   background: color-mix(in srgb, var(--wn-accent) 12%, transparent);
   color: var(--wn-accent); font-size: var(--wn-text-micro); font-weight: 700;
   letter-spacing: 0.04em; text-transform: uppercase;
@@ -276,7 +280,7 @@ body {
 
 .wnd-loop { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .wnd-loop__step {
-  padding: 9px 16px; border-radius: 999px; font-size: var(--wn-text-caption); font-weight: 600;
+  padding: var(--wn-space-2\.5) var(--wn-space-4); border-radius: var(--wn-radius-pill); font-size: var(--wn-text-caption); font-weight: 600;
   background: var(--wn-surface); border: 1px solid var(--wn-border-strong);
 }
 .wnd-loop__arrow { color: var(--wn-muted); display: grid; place-items: center; }
@@ -292,7 +296,7 @@ body {
 .wnd-plane:hover { text-decoration: none; border-color: var(--wn-accent); transform: translateX(2px); }
 .wnd-plane__badge { width: 44px; height: 44px; border-radius: var(--wn-radius-md); display: grid; place-items: center; color: #fff; }
 .wnd-plane__badge svg { width: 22px; height: 22px; }
-.wnd-plane__body { display: grid; gap: 3px; min-width: 0; }
+.wnd-plane__body { display: grid; gap: var(--wn-space-1); min-width: 0; }
 .wnd-plane__body b { font-size: var(--wn-text-label); }
 .wnd-plane__body span { font-size: var(--wn-text-caption); color: var(--wn-text-secondary); }
 .wnd-plane__n { font-size: var(--wn-text-caption); color: var(--wn-muted); font-weight: 600; white-space: nowrap; }
@@ -320,8 +324,8 @@ body {
 .wnd-role h3 { font-size: var(--wn-text-title); font-weight: 700; margin: 0; }
 .wnd-role p { margin: 0; font-size: var(--wn-text-caption); color: var(--wn-text-secondary); line-height: 1.6; }
 .wnd-role__steps { display: grid; gap: 6px; font-size: var(--wn-text-caption); color: var(--wn-text-secondary); }
-.wnd-role__steps li { display: flex; gap: 8px; align-items: flex-start; }
-.wnd-role__steps svg { width: 15px; height: 15px; color: var(--wn-accent); flex: none; margin-top: 3px; }
+.wnd-role__steps li { display: flex; gap: var(--wn-space-2); align-items: flex-start; }
+.wnd-role__steps svg { width: 15px; height: 15px; color: var(--wn-accent); flex: none; margin-top: var(--wn-space-0\.5); }
 .wnd-role__cta { display: inline-flex; align-items: center; gap: 8px; font-size: var(--wn-text-label);
   font-weight: 600; color: var(--wn-accent); }
 .wnd-role__cta svg { width: 16px; height: 16px; }
@@ -341,7 +345,7 @@ body {
 .wnd-swatches { display: grid; gap: var(--wn-space-3); grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 .wnd-swatch { border-radius: var(--wn-radius-md); overflow: hidden; border: 1px solid var(--wn-border); background: var(--wn-surface); }
 .wnd-swatch__chip { height: 58px; }
-.wnd-swatch__meta { padding: 9px 11px; display: grid; gap: 1px; }
+.wnd-swatch__meta { padding: var(--wn-space-2\.5) var(--wn-space-3); display: grid; gap: var(--wn-space-0\.5); }
 .wnd-swatch__meta b { font-size: var(--wn-text-micro); }
 .wnd-swatch__meta code { font-size: 11px; color: var(--wn-muted);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
@@ -353,8 +357,8 @@ body {
 .wnd-tablewrap { overflow-x: auto; border: 1px solid var(--wn-border); border-radius: var(--wn-radius-lg); background: var(--wn-surface); }
 
 .wnd-pass, .wnd-fail {
-  display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: var(--wn-text-micro);
-  padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: var(--wn-space-1\.5); font-weight: 700; font-size: var(--wn-text-micro);
+  padding: var(--wn-space-0\.5) var(--wn-space-2); border-radius: var(--wn-radius-pill); white-space: nowrap;
 }
 .wnd-pass { color: var(--wn-success); background: color-mix(in srgb, var(--wn-success) 13%, transparent); }
 .wnd-fail { color: var(--wn-danger);  background: color-mix(in srgb, var(--wn-danger) 13%, transparent); }
@@ -366,7 +370,7 @@ body {
 .wnd-rule__n { font-weight: 800; font-size: var(--wn-text-label); color: var(--wn-accent);
   background: color-mix(in srgb, var(--wn-accent) 11%, transparent);
   border-radius: var(--wn-radius-sm); display: grid; place-items: center; height: 30px; }
-.wnd-rule__body { display: grid; gap: 5px; }
+.wnd-rule__body { display: grid; gap: var(--wn-space-1\.5); }
 .wnd-rule__body b { font-size: var(--wn-text-label); }
 .wnd-rule__body p { margin: 0; font-size: var(--wn-text-caption); color: var(--wn-text-secondary); line-height: 1.55; }
 .wnd-rule__forbid { font-size: var(--wn-text-caption); color: var(--wn-danger); }
@@ -403,26 +407,49 @@ body {
 
 /* trang tự kiểm tra */
 .wnd-check__row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--wn-space-3);
-  padding: 7px 0; border-bottom: 1px solid var(--wn-border); font-size: var(--wn-text-caption); }
+  padding: var(--wn-space-2) 0; border-bottom: 1px solid var(--wn-border); font-size: var(--wn-text-caption); }
 
 /* --------------------------------------------------------------- mobile --- */
 
+/* Ngăn kéo danh sách màn là một lớp phủ — nên phải có lớp mờ, và chạm ra ngoài thì đóng. */
+.wnd-railscrim { display: none; }
+
 @media (max-width: 1080px) {
-  .wnd-rail { position: fixed; inset: 60px auto 0 0; z-index: 25; width: 280px;
+  .wnd-rail { position: fixed; inset: var(--wnd-topbar-h) auto 0 0; z-index: 25; width: 280px;
     box-shadow: var(--wn-shadow-raised); transform: translateX(-100%);
     transition: transform var(--wn-motion-base) var(--wn-easing); }
   .wnd-rail[hidden] { display: block; pointer-events: none; }
   .wnd-rail.is-open { transform: none; pointer-events: auto; }
   .wnd-menu-toggle { display: grid; }
-  .wnd-canvaswrap { padding: var(--wn-space-4) var(--wn-space-4) var(--wn-space-12); }
+  :root { --wnd-canvas-pad: 16px; }
+
+  .wnd-railscrim { display: block; position: fixed; inset: var(--wnd-topbar-h) 0 0 0; z-index: 24;
+    background: rgba(15, 23, 42, 0.48); opacity: 0; pointer-events: none;
+    transition: opacity var(--wn-motion-base) var(--wn-easing); }
+  .wnd-railscrim.is-on { opacity: 1; pointer-events: auto; }
 }
+
 @media (max-width: 720px) {
   .wnd-topbar { padding-inline: var(--wn-space-3); gap: var(--wn-space-2); }
   .wnd-wordmark__text { display: none; }
   .wnd-sections a span { display: none; }
-  .wnd-sections a { padding: 8px 10px; }
+  .wnd-sections a { padding: var(--wn-space-2) var(--wn-space-2\.5); }
   .wnd-doc { padding: var(--wn-space-6) var(--wn-space-4) var(--wn-space-12); gap: var(--wn-space-8); }
   #wnd-viewport { display: none; }
+
+  /* Trên điện thoại, khung thiết bị không còn nói lên điều gì — nó chỉ ăn mất màn hình và
+     đẻ ra tầng cuộn thứ hai, khiến bottom nav và bottom sheet tụt xuống dưới mép máy.
+     Bỏ khung: màn sản phẩm chiếm trọn phần dưới thanh trên, chỉ còn MỘT tầng cuộn. */
+  :root { --wnd-canvas-pad: 0px; }
+  .wnd-frame { max-width: none; border: 0; border-radius: 0; box-shadow: none; }
+  .wnd-frame__chrome { display: none; }
+  .wnd-frame__viewport { height: calc(100vh - var(--wnd-topbar-h) - var(--wn-space-8)); }
+  /* svh (không phải dvh): thanh công cụ của trình duyệt ẩn/hiện sẽ không làm khung co giãn
+     giữa lúc đang cuộn — và vì luôn ≤ khung nhìn thật, không bao giờ bị cắt. */
+  @supports (height: 100svh) {
+    .wnd-frame__viewport { height: calc(100svh - var(--wnd-topbar-h) - var(--wn-space-8)); }
+  }
+  .wnd-caption, .wnd-prevnext { width: calc(100% - var(--wn-space-8)); max-width: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {

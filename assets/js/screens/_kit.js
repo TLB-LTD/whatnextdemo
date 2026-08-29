@@ -210,6 +210,14 @@ export function adminShell(activeId, content, o = {}) {
       ${o.toolbar || ''}
       ${avatar('Trần Minh', { size: 30, tint: 'var(--wn-muted)' })}
     </header>
+    <nav class="wn-only-narrow" aria-label="Mục quản trị"
+      style="border-bottom:1px solid var(--wn-border);background:var(--wn-surface);
+      overflow-x:auto;scrollbar-width:none">
+      <div class="wn-row" style="gap:var(--wn-space-2);padding:var(--wn-space-2) var(--wn-gutter);width:max-content">
+        ${ADMIN_NAV.filter((n) => !n.sub || n.id === activeId).map((n) => html`<span
+          class="wn-chip ${n.id === activeId ? 'is-on' : ''}">${icon(n.icon)}${n.label}</span>`)}
+      </div>
+    </nav>
     <div style="flex:1;display:flex;min-height:0">
       <nav class="wn-only-wide" aria-label="Mục quản trị"
         style="width:236px;flex:none;border-right:1px solid var(--wn-border);background:var(--wn-surface);

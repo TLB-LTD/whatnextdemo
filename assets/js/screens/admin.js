@@ -531,7 +531,7 @@ export const adminScreens = [
           html`<div class="wn-row">${badge(s.label, s.tone, s.icon)}
             ${btn('Về hàng đợi', { kind: 'ghost', act: 'queue', icon: 'arrowLeft' })}</div>`)}
 
-        <div style="display:grid;gap:var(--wn-space-5);grid-template-columns:230px minmax(0,1fr) 330px;align-items:start">
+        <div class="wn-review3">
 
           <div class="wn-stack-3">
             <div class="wn-card wn-card--pad0">
@@ -583,7 +583,8 @@ export const adminScreens = [
             <div class="wn-card wn-stack-3">
               <b class="wn-label">Trao đổi với tác giả</b>
               <div class="wn-thread" style="max-height:280px;overflow:auto">
-                ${u.thread.length ? u.thread.map((m) => html`<div class="wn-msg wn-msg--${m.role === 'staff' ? 'author' : m.role}">
+                ${u.thread.length ? u.thread.map((m) => html`<div class="wn-msg ${
+                  m.role === 'staff' ? 'wn-msg--mine' : m.role === 'system' ? 'wn-msg--system' : ''}">
                   ${m.role !== 'system' ? html`<span class="wn-msg__meta">
                     ${m.role === 'staff' ? 'Bạn' : u.ownerName} · ${relTime(m.at)}</span>` : ''}
                   <div class="wn-msg__bubble">${m.anchor ? html`<span class="wn-badge wn-badge--neutral"

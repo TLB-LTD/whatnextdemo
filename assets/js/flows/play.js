@@ -9,7 +9,7 @@
  *  · màn kết có đủ năm khối, và pháo giấy chỉ rơi khi đoạn kết thật sự tích cực
  */
 
-import { html, icon, raw, art, progressSegments, btn, iconBtn, confetti, reducedMotion, qs } from 'wnd/ui.js';
+import { html, icon, raw, art, progressSegments, btn, iconBtn, sheet, confetti, reducedMotion, qs } from 'wnd/ui.js';
 import { STRATEGY_BY_CODE } from 'wnd/data/strategies.js';
 import { recordStrategies, markFinished, sendProposal } from 'wnd/state.js';
 
@@ -185,10 +185,7 @@ function endingView(ctx, sess, story, ending, o) {
 }
 
 function proposalSheet(sess) {
-  return html`<div class="wn-scrim" data-act="close-sheet"></div>
-    <div class="wn-sheet" role="dialog" aria-modal="true" aria-label="Đề xuất cách khác">
-      <div class="wn-sheet__handle"></div>
-      <div class="wn-stack">
+  return sheet(html`<div class="wn-stack">
         <div class="wn-stack-1">
           <b class="wn-title">Con có cách khác không?</b>
           <span class="wn-caption">Người lớn ở đội nội dung sẽ đọc. Nếu hay, cách của con có thể
@@ -200,15 +197,11 @@ function proposalSheet(sess) {
           ${btn('Gửi cho đội nội dung', { kind: 'primary', act: 'send-proposal', icon: 'send' })}
           ${btn('Để sau', { kind: 'ghost', act: 'close-sheet' })}
         </div>
-      </div>
-    </div>`;
+      </div>`, { label: 'Đề xuất cách khác' });
 }
 
 function exitSheet() {
-  return html`<div class="wn-scrim" data-act="close-sheet"></div>
-    <div class="wn-sheet" role="dialog" aria-modal="true" aria-label="Thoát truyện">
-      <div class="wn-sheet__handle"></div>
-      <div class="wn-stack">
+  return sheet(html`<div class="wn-stack">
         <div class="wn-stack-1">
           <b class="wn-title">Thoát truyện?</b>
           <span class="wn-caption">Con đang đọc dở. Thoát bây giờ thì lần sau bắt đầu lại từ đầu.</span>
@@ -217,20 +210,15 @@ function exitSheet() {
           ${btn('Đọc tiếp', { kind: 'primary', block: true, act: 'close-sheet' })}
           ${btn('Thoát', { kind: 'secondary', block: true, act: 'exit' })}
         </div>
-      </div>
-    </div>`;
+      </div>`, { label: 'Thoát truyện' });
 }
 
 function menuSheet() {
-  return html`<div class="wn-scrim" data-act="close-sheet"></div>
-    <div class="wn-sheet" role="dialog" aria-modal="true" aria-label="Thêm">
-      <div class="wn-sheet__handle"></div>
-      <div class="wn-stack-2">
-        ${btn('Bắt đầu lại từ đầu', { kind: 'secondary', block: true, act: 'replay', icon: 'refresh' })}
-        ${btn('Thoát truyện', { kind: 'secondary', block: true, act: 'exit' })}
-        ${btn('Đóng', { kind: 'ghost', block: true, act: 'close-sheet' })}
-      </div>
-    </div>`;
+  return sheet(html`<div class="wn-stack-2">
+      ${btn('Bắt đầu lại từ đầu', { kind: 'secondary', block: true, act: 'replay', icon: 'refresh' })}
+      ${btn('Thoát truyện', { kind: 'secondary', block: true, act: 'exit' })}
+      ${btn('Đóng', { kind: 'ghost', block: true, act: 'close-sheet' })}
+    </div>`, { label: 'Thêm' });
 }
 
 /* ------------------------------------------------------------------- hành động */

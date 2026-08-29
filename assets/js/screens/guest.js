@@ -5,7 +5,7 @@
  * chặn ở đâu thì ở đó phải nói rõ đăng nhập được thêm gì, chứ không chỉ nói "cần đăng nhập".
  */
 
-import { html, icon, raw, art, cover, btn, badge, banner, empty, skeletonGrid, storyCard } from 'wnd/ui.js';
+import { html, icon, raw, art, cover, btn, badge, banner, empty, skeletonGrid, storyCard, sheet } from 'wnd/ui.js';
 import { readerShell, storySection, wordmark } from 'wnd/screens/_kit.js';
 import { AGE_BANDS, CATEGORIES, categoryIcon, evaluateAccess } from 'wnd/data/catalog.js';
 import { library, findStory } from 'wnd/data/library.js';
@@ -272,10 +272,7 @@ export const guestScreens = [
         <div class="wn-scroll wn-pad" style="opacity:.35;pointer-events:none">
           ${[1, 2, 3, 4].map(() => html`<div class="wn-skel" style="height:120px;margin-bottom:12px"></div>`)}
         </div>
-        <div class="wn-scrim"></div>
-        <div class="wn-sheet" role="dialog" aria-modal="true" aria-label="Lời mời đăng ký">
-          <div class="wn-sheet__handle"></div>
-          <div class="wn-stack">
+        ${sheet(html`<div class="wn-stack">
             <div class="wn-stack-1">
               <b class="wn-title">Lưu hành trình của con</b>
               <span class="wn-caption">Miễn phí, và bố mẹ là người giữ tài khoản.</span>
@@ -294,12 +291,12 @@ export const guestScreens = [
               ${btn('Đã có tài khoản — Đăng nhập', { kind: 'secondary', block: true })}
               ${btn('Để sau', { kind: 'ghost', block: true, act: 'later' })}
             </div>
-          </div>
-        </div>
+          </div>`, { label: 'Lời mời đăng ký', closeAct: 'later' })}
       </div>`;
     },
     act(ctx, act) {
-      if (act === 'later') ctx.go('/man-hinh/guest-library');
+      /* Chạm lớp mờ, bấm "Để sau", hay bấm Escape — cùng một lối ra. */
+      if (act === 'later' || act === 'close-sheet') ctx.go('/man-hinh/guest-library');
     },
   },
 ];

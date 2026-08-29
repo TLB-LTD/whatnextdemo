@@ -253,7 +253,7 @@ export function designSystemPage() {
         <p>Thang base 4 kèm nửa bước — chọn để nuốt trọn những con số lẻ vốn đã nằm sẵn trong code
           (6, 10, 18, 22) thay vì bắt cả codebase đi làm tròn.</p>
       </div>
-      <div class="wnd-card wnd-stack-2">
+      <div class="wnd-card wn-stack-2">
         ${Object.entries(SPACE).map(([k, v]) => html`<div class="wnd-scaleline">
           <span style="width:52px"><code>${k}</code></span>
           <i style="width:${v}px"></i><span>${v}px</span>
