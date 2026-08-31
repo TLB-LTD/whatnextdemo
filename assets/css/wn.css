@@ -124,6 +124,26 @@
 .wn-icobtn--onart { background: rgba(15, 23, 42, 0.55); color: #fff; backdrop-filter: blur(6px); }
 .wn-icobtn--onart:hover:not([disabled]):not([aria-disabled="true"]) { background: rgba(15, 23, 42, 0.7); }
 
+/* Three theme buttons, one chosen (DOCS 04.09 §8). The chosen one needs a ground you can
+   see, not only aria-checked, or the group reads as three identical icons. */
+.wn-themebtn {
+  display: inline-grid; place-items: center;
+  width: var(--wn-tap); height: var(--wn-tap);
+  border-radius: var(--wn-radius-pill);
+  border: 1px solid var(--wn-border); background: var(--wn-surface);
+  color: var(--wn-muted); cursor: pointer;
+  transition: background-color var(--wn-motion-fast) var(--wn-easing),
+              color var(--wn-motion-fast) var(--wn-easing),
+              border-color var(--wn-motion-fast) var(--wn-easing);
+}
+.wn-themebtn:hover { background: color-mix(in srgb, var(--wn-border) 40%, transparent); }
+.wn-themebtn[aria-checked="true"] {
+  background: color-mix(in srgb, var(--wn-accent) 14%, transparent);
+  border-color: var(--wn-accent);
+  color: var(--wn-accent);
+}
+.wn-themebtn:focus-visible { outline: 2px solid var(--wn-focus); outline-offset: 2px; }
+
 /* Trường nhập — viền dùng border-strong, không dùng border (1.23:1) */
 .wn-input, .wn-select, .wn-textarea {
   width: 100%; min-height: var(--wn-tap);
