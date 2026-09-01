@@ -553,3 +553,61 @@
 }
 .wn-msg__meta { font-size: var(--wn-text-micro); color: var(--wn-muted); }
 .wn-msg--mine .wn-msg__meta { text-align: right; }
+
+/* Tiền -------------------------------------------------------------------
+   Một con số tiền trông giống nhau ở mọi màn: cùng font số, cùng cách hiện dấu âm.
+   Chữ số dùng `tabular-nums` để một cột số dư không nhảy trái phải khi giá trị đổi. */
+.wn-money {
+  font-variant-numeric: tabular-nums; font-weight: 600; color: var(--wn-text);
+  white-space: nowrap;
+}
+.wn-money--neg { color: var(--wn-danger); }
+.wn-money--lg { font-size: var(--wn-text-h2); }
+
+/* Ô số dư ở đầu màn ví */
+.wn-balance {
+  display: grid; gap: var(--wn-space-1);
+  padding: var(--wn-space-5); border-radius: var(--wn-radius-lg);
+  background: color-mix(in srgb, var(--wn-accent) 8%, var(--wn-surface));
+  border: 1px solid color-mix(in srgb, var(--wn-accent) 24%, transparent);
+}
+.wn-balance__label { font-size: var(--wn-text-caption); color: var(--wn-muted); }
+
+/* Một dòng trong lịch sử giao dịch */
+.wn-txn {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: var(--wn-space-3); padding: var(--wn-space-3) 0;
+  border-bottom: 1px solid var(--wn-border);
+}
+.wn-txn__what { display: grid; gap: 2px; min-width: 0; }
+.wn-txn__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wn-txn__when { font-size: var(--wn-text-micro); color: var(--wn-muted); }
+
+/* Điểm khoá trong trình đọc.
+   Không phải một cánh cửa đóng: phần trên vẫn là truyện, phần này là lời mời. */
+.wn-paywall {
+  display: grid; gap: var(--wn-space-3); justify-items: center; text-align: center;
+  padding: var(--wn-space-6) var(--wn-space-4); border-radius: var(--wn-radius-lg);
+  background: var(--wn-surface); border: 1px dashed var(--wn-border);
+}
+.wn-paywall__lock { font-size: var(--wn-text-h1); line-height: 1; }
+.wn-paywall__note { font-size: var(--wn-text-caption); color: var(--wn-text-secondary); max-width: 46ch; }
+.wn-paywall__price { font-size: var(--wn-text-h2); font-variant-numeric: tabular-nums; }
+
+/* Mã tham chiếu chuyển khoản — phải copy được, và phải đọc được từng ký tự */
+.wn-refcode {
+  display: inline-flex; align-items: center; gap: var(--wn-space-2);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: var(--wn-text-h3); letter-spacing: 0.12em;
+  padding: var(--wn-space-2) var(--wn-space-4); border-radius: var(--wn-radius-md);
+  background: var(--wn-bg); border: 1px solid var(--wn-border);
+}
+
+/* Ô "đang chờ đối chiếu" — trạng thái giữa nạp và có tiền */
+.wn-pending {
+  display: flex; align-items: center; gap: var(--wn-space-2);
+  padding: var(--wn-space-3) var(--wn-space-4); border-radius: var(--wn-radius-md);
+  background: color-mix(in srgb, var(--wn-warning) 12%, var(--wn-surface));
+  border: 1px solid color-mix(in srgb, var(--wn-warning) 32%, transparent);
+  font-size: var(--wn-text-caption);
+}
